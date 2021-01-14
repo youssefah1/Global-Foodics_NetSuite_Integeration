@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30309.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetSuiteIntegeration", "NetSuiteIntegeration\NetSuiteIntegeration.csproj", "{77472D5F-702D-4E63-B623-0E1A2E89E03C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC1A3D17-7017-4B86-84ED-B35E50F5B7DE} = {EC1A3D17-7017-4B86-84ED-B35E50F5B7DE}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodicsIntegeration", "FoodicsIntegeration\FoodicsIntegeration.csproj", "{CF16CEA3-4E26-4A4A-8C07-30867D7A1D2D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC1A3D17-7017-4B86-84ED-B35E50F5B7DE} = {EC1A3D17-7017-4B86-84ED-B35E50F5B7DE}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foodics.NetSuite.Shared", "Foodics.NetSuite.Shared\Foodics.NetSuite.Shared.csproj", "{EC1A3D17-7017-4B86-84ED-B35E50F5B7DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foodics_NetSuite_Integeration", "Foodics_NetSuite_Integeration\Foodics_NetSuite_Integeration.csproj", "{31430A6C-8E45-489C-8593-A17076A8538A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77472D5F-702D-4E63-B623-0E1A2E89E03C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77472D5F-702D-4E63-B623-0E1A2E89E03C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77472D5F-702D-4E63-B623-0E1A2E89E03C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77472D5F-702D-4E63-B623-0E1A2E89E03C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF16CEA3-4E26-4A4A-8C07-30867D7A1D2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF16CEA3-4E26-4A4A-8C07-30867D7A1D2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF16CEA3-4E26-4A4A-8C07-30867D7A1D2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF16CEA3-4E26-4A4A-8C07-30867D7A1D2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC1A3D17-7017-4B86-84ED-B35E50F5B7DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC1A3D17-7017-4B86-84ED-B35E50F5B7DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC1A3D17-7017-4B86-84ED-B35E50F5B7DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC1A3D17-7017-4B86-84ED-B35E50F5B7DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31430A6C-8E45-489C-8593-A17076A8538A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31430A6C-8E45-489C-8593-A17076A8538A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31430A6C-8E45-489C-8593-A17076A8538A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31430A6C-8E45-489C-8593-A17076A8538A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C72B5DDE-BD45-4197-AA7A-F3F1F73D1293}
+	EndGlobalSection
+EndGlobal

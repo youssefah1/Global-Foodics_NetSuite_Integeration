@@ -67,7 +67,7 @@ namespace FoodicsIntegeration.Tasks
 
 
 
-            new GenericeDAO<PaymentMethod>().NetSuiteIntegration(NetSuitelst);
+            new GenericeDAO<PaymentMethod>().FoodicsIntegration(NetSuitelst);
         }
             catch (Exception ex)
             {

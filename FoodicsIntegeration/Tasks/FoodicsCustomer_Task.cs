@@ -98,7 +98,7 @@ namespace FoodicsIntegeration.Tasks
                     NetSuitelst.Add(obj);
 
                 }
-                new GenericeDAO<Customer>().NetSuiteIntegration(NetSuitelst);
+                new GenericeDAO<Customer>().FoodicsIntegration(NetSuitelst);
             }
             catch (Exception ex)
             {

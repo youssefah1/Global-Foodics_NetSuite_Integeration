@@ -10,7 +10,8 @@ namespace Foodics.NetSuite.Shared.Model
         public int Invoice_Id { get; set; }
         public int Invoice_Netsuite_Id { get; set; }
         public int Item_Id { get; set; }
-
+        public int ProductStatus { get; set; }
+        
         public string FoodicsItem_Id { get; set; }
         public string Item_Code { get; set; }
         public string Item_Name { get; set; }

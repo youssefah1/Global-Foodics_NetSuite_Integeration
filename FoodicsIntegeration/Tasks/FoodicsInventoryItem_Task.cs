@@ -70,8 +70,8 @@ namespace FoodicsIntegeration.Tasks
             try
             {
                 List<Item> NetSuitelst = new List<Item>();
-                List<Inventory> NetSuiteInventorylst = new List<Inventory>();
-                List<ItemPrice> NetSuiteItemPricelst = new List<ItemPrice>();
+                //List<Inventory> NetSuiteInventorylst = new List<Inventory>();
+                //List<ItemPrice> NetSuiteItemPricelst = new List<ItemPrice>();
 
                 foreach (var Foodicsitem in lstitems)
                 {
@@ -117,21 +117,21 @@ namespace FoodicsIntegeration.Tasks
 
                     Netsuiteitem.Price = Utility.ConvertToDouble(Foodicsitem.cost);
 
-                    Inventory NetsuiteInventroy = new Inventory();
-                    NetsuiteInventroy.Foodics_Id = Foodicsitem.id;
-                    NetsuiteInventroy.SerialNumbers = Foodicsitem.barcode;
-                    ItemPrice NetsuiteItemPrice = new ItemPrice();
-                    NetsuiteItemPrice.Foodics_Id = Foodicsitem.id;
-                    NetsuiteItemPrice.Price = float.Parse(Foodicsitem.cost != null ? Foodicsitem.cost : "0");
-                    NetsuiteItemPrice.Price_Level_Id = 0;
+                    //Inventory NetsuiteInventroy = new Inventory();
+                    //NetsuiteInventroy.Foodics_Id = Foodicsitem.id;
+                    //NetsuiteInventroy.SerialNumbers = Foodicsitem.barcode;
+                    //ItemPrice NetsuiteItemPrice = new ItemPrice();
+                    //NetsuiteItemPrice.Foodics_Id = Foodicsitem.id;
+                    //NetsuiteItemPrice.Price = float.Parse(Foodicsitem.cost != null ? Foodicsitem.cost : "0");
+                    //NetsuiteItemPrice.Price_Level_Id = 0;
 
                     NetSuitelst.Add(Netsuiteitem);
-                    NetSuiteInventorylst.Add(NetsuiteInventroy);
-                    NetSuiteItemPricelst.Add(NetsuiteItemPrice);
+                    //NetSuiteInventorylst.Add(NetsuiteInventroy);
+                    //NetSuiteItemPricelst.Add(NetsuiteItemPrice);
                 }
-                new GenericeDAO<Item>().NetSuiteIntegration(NetSuitelst);
-                new GenericeDAO<Inventory>().NetSuiteIntegration(NetSuiteInventorylst);
-                new GenericeDAO<ItemPrice>().NetSuiteIntegration(NetSuiteItemPricelst);
+                new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst);
+                //new GenericeDAO<Inventory>().NetSuiteIntegration(NetSuiteInventorylst);
+                //new GenericeDAO<ItemPrice>().NetSuiteIntegration(NetSuiteItemPricelst);
             }
             catch (Exception ex)
             {

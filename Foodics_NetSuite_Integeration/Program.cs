@@ -21,18 +21,18 @@ namespace Foodics_NetSuite_Integeration
             Subsidary[0] = "Overdose";
             //Subsidary[0] = "Monroe";
             //Subsidary[1] = "Laviviane";
-            foreach (string sub in Subsidary)
-            {
-                LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " Start Running ", DateTime.Now.ToString());
+            //foreach (string sub in Subsidary)
+            //{
+            //    LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " Start Running ", DateTime.Now.ToString());
 
-                // GenerateRunningTask(sub);
+            //    GenerateRunningTask(sub);
 
-                LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " End Running ", DateTime.Now.ToString());
-            }
+            //    LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " End Running ", DateTime.Now.ToString());
+            //}
 
             #region cutom task call
             CustomFoodicsTaskCall("Overdose");
-            CustomTaskCall();
+            //CustomTaskCall();
 
 
 
@@ -76,13 +76,14 @@ namespace Foodics_NetSuite_Integeration
         }
         private static void CustomFoodicsTaskCall(string Subsidary)
         {
-            Foodics_BaseIntegration[] FoodicstaskInital = new Foodics_BaseIntegration[1];
+            // Foodics_BaseIntegration[] FoodicstaskInital = new Foodics_BaseIntegration[1];
 
             //FoodicstaskInital[0] = new FoodicsBranche_Task();
-            //FoodicstaskInital[0] = new FoodicsPaymentMethod_Task();
+            //FoodicstaskInital[1] = new FoodicsPaymentMethod_Task();
             //FoodicstaskInital[2] = new FoodicsCategories_task();
-            //FoodicstaskInital[3] = new FoodicsCustomer_Task();
+            //FoodicstaskInital[0] = new FoodicsCustomer_Task();
             //FoodicstaskInital[0] = new FoodicsInventoryItem_Task();
+            //FoodicstaskInital[0] = new FoodicsdDiscounts_Task();
 
             //foreach (Foodics_BaseIntegration ts in FoodicstaskInital)
             //{
@@ -98,10 +99,8 @@ namespace Foodics_NetSuite_Integeration
 
             Foodics_BaseIntegration[] FoodicstaskFinal = new Foodics_BaseIntegration[1];
             //FoodicstaskFinal[0] = new Foodicsproducts_Task();
-            //FoodicstaskFinal[1] = new FoodicsGiftCardProduct_Task();
-            //FoodicstaskFinal[2] = new FoodicsCombo_Task();
             FoodicstaskFinal[0] = new FoodicsOrder_Task();
-            //FoodicstaskFinal[0] = new FoodicsdDiscounts_Task();
+
             foreach (Foodics_BaseIntegration ts in FoodicstaskFinal)
             {
                 try

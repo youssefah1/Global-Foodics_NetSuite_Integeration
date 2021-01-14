@@ -29,8 +29,8 @@ namespace FoodicsIntegeration.Tasks
                     if (item.Key == "data")
                     {
                         //List<Branches> lst = item.Value;
-                        if (item.Value.Count > 0)
-                            new GenericeDAO<FoodicsGiftcardtransaction>().FoodicsIntegration(item.Value);
+                        //if (item.Value.Count > 0)
+                        //    new GenericeDAO<FoodicsGiftcardtransaction>().FoodicsIntegration(item.Value);
                         //foreach (var item2 in lst)
                         //{
                         //    string name = item2.name;

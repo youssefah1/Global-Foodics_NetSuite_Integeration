@@ -22,7 +22,7 @@ namespace FoodicsIntegeration.Tasks
             DateTime fromDate = new DateTime();
             //if (fromDateObj == null)
             //{
-                fromDate = new DateTime(2021, 01, 07);
+            fromDate = new DateTime(2021, 01, 07);
             //}
             //else
             //{
@@ -30,58 +30,59 @@ namespace FoodicsIntegeration.Tasks
             //}
             //while (fromDate <= DateTime.Now)
             //{
-                string MainURL = ConfigurationManager.AppSettings[Subsidiary+"Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,products.product,products.discount,payments.payment_method" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
-                string NextPage = MainURL;
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,products.product,products.discount,payments.payment_method" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
+            string NextPage = MainURL;
 
-                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd"));
-                do
+            LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd"));
+            do
+            {
+                var client = new RestClient(NextPage);
+                client.Timeout = -1;
+                var request = new RestRequest(Method.GET);
+                request.AddHeader("Authorization", "Bearer " + ConfigurationManager.AppSettings[Subsidiary + "Foodics.Token"]);
+                var response = client.Execute<Dictionary<string, List<FoodicsOrder>>>(request);
+                if (response.StatusCode == HttpStatusCode.OK && response.Data != null)
                 {
-                    var client = new RestClient(NextPage);
-                    client.Timeout = -1;
-                    var request = new RestRequest(Method.GET);
-                    request.AddHeader("Authorization", "Bearer " + ConfigurationManager.AppSettings[Subsidiary+"Foodics.Token"]);
-                    var response = client.Execute<Dictionary<string, List<FoodicsOrder>>>(request);
-                    if (response.StatusCode == HttpStatusCode.OK && response.Data != null)
+                    string content = response.Content;
+                    var Jobj = JObject.Parse(content);
+                    var nodes = Jobj.Descendants()
+                   .OfType<JProperty>()
+                   .Where(p => p.Name == "next")
+                   .Select(p => p.Parent)
+                   .ToList();
+                    if (nodes.Count > 0)
                     {
-                        string content = response.Content;
-                        var Jobj = JObject.Parse(content);
-                        var nodes = Jobj.Descendants()
-                       .OfType<JProperty>()
-                       .Where(p => p.Name == "next")
-                       .Select(p => p.Parent)
-                       .ToList();
-                        if (nodes.Count > 0)
+                        FoodicsLinks objLinks = new FoodicsLinks();
+                        try
                         {
-                            FoodicsLinks objLinks = new FoodicsLinks();
-                            try
+                            objLinks = JsonConvert.DeserializeObject<FoodicsLinks>(JsonConvert.SerializeObject(nodes[0]));
+                            NextPage = objLinks.next;
+                            if (!string.IsNullOrEmpty(NextPage))
                             {
-                                objLinks = JsonConvert.DeserializeObject<FoodicsLinks>(JsonConvert.SerializeObject(nodes[0]));
-                                NextPage = objLinks.next;
-                                if (!string.IsNullOrEmpty(NextPage))
-                                {
-                                    int startIndex = NextPage.LastIndexOf("?") + 1;
-                                    int endIndex = NextPage.Length - startIndex;
-                                    string page = NextPage.Substring(startIndex, endIndex);
-                                    NextPage = MainURL + "&" + page;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
+                                int startIndex = NextPage.LastIndexOf("?") + 1;
+                                int endIndex = NextPage.Length - startIndex;
+                                string page = NextPage.Substring(startIndex, endIndex);
+                                NextPage = MainURL + "&" + page;
                             }
                         }
-                        foreach (var item in response.Data)
+                        catch (Exception ex)
                         {
-                            if (item.Key == "data")
-                            {
-                                if (item.Value.Count > 0)
-                                    Generate_Save_NetSuiteLst(item.Value, Subsidiary);
-                            }
+                            LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
                         }
                     }
+                    foreach (var item in response.Data)
+                    {
+                        if (item.Key == "data")
+                        {
+                            if (item.Value.Count > 0)
+                                Generate_Save_NetSuiteLst(item.Value, Subsidiary);
+                        }
+                    }
+                }
 
-                    
-                } while (!string.IsNullOrEmpty(NextPage));
+
+            } while (!string.IsNullOrEmpty(NextPage));
+            new CustomDAO().InvoiceDetailsUpdateID();
             //    fromDate = fromDate.AddDays(1);
             //}
 
@@ -173,6 +174,8 @@ namespace FoodicsIntegeration.Tasks
                         //Products
                         foreach (var prodobj in Foodicsitem.Products)
                         {
+                            //if (prodobj.status == 3)//3 is delivered
+                            //{
                             Item itemobj = new GenericeDAO<Item>().GetByFoodicsId(prodobj.Product.id);
                             if (itemobj != null)
                             {
@@ -193,10 +196,11 @@ namespace FoodicsIntegeration.Tasks
 
                                 Netsuiteinvoiceitem.Line_Discount_Amount = (float)prodobj.discount_amount;
                                 Netsuiteinvoiceitem.Is_Ingredients_Wasted = prodobj.is_ingredients_wasted;
+                                Netsuiteinvoiceitem.ProductStatus = prodobj.status;
                                 InvoiceItemlst.Add(Netsuiteinvoiceitem);
-
-
                             }
+
+                            //}
                         }
 
                         //payment methods
@@ -213,45 +217,34 @@ namespace FoodicsIntegeration.Tasks
                             paymethod.Ref = payobj.payment_method.name;
                             paymethod.Notes = payobj.payment_method.name;
                             paymethod.Business_Date = payobj.Business_Date;
-
                             if (PaymentMethodobj != null && PaymentMethodobj.Netsuite_Id > 0)
                             {
                                 paymethod.Payment_Method = PaymentMethodobj.Name_En;
                                 paymethod.Payment_Method_Id = PaymentMethodobj.Netsuite_Id;
                                 paymethod.Payment_Method_Percentage = PaymentMethodobj.Percentage;
-
                             }
                             else
                             {
                                 paymethod.Payment_Method = "Cash";
                                 paymethod.Payment_Method_Id = 1;
                                 paymethod.Payment_Method_Percentage = 0;
-
                             }
                             paymethod.Payment_Method_Type = 0;
                             paymethod.Payment_Method_Type_Netsuite_Id = 0;
-
-
-
-
                             PaymentMethodEntitylst.Add(paymethod);
-
-
                         }
-
                         Invoicelst.Add(Netsuiteitem);
-
-
-                        new GenericeDAO<Invoice>().FoodicsIntegration(Invoicelst);
-                        new GenericeDAO<Invoice>().InvoiceDetailsDelete(Invoicelst);
-                        new GenericeDAO<InvoiceItem>().ListInsertOnly(InvoiceItemlst);
-                        new GenericeDAO<PaymentMethodEntity>().ListInsertOnly(PaymentMethodEntitylst);
+                     
                         //new GenericeDAO<Invoice>().InvoiceDetailsUpdateID();
                         //new GenericeDAO<ItemPrice>().NetSuiteIntegration(NetSuiteItemPricelst);
                         //return NetSuitelst;
-                        new CustomDAO().InvoiceDetailsUpdateID();
+                        
                     }
                 }
+                new GenericeDAO<Invoice>().FoodicsIntegration(Invoicelst);
+                new GenericeDAO<Invoice>().InvoiceDetailsDelete(Invoicelst);
+                new GenericeDAO<InvoiceItem>().ListInsertOnly(InvoiceItemlst);
+                new GenericeDAO<PaymentMethodEntity>().ListInsertOnly(PaymentMethodEntitylst);
 
             }
             catch (Exception ex)

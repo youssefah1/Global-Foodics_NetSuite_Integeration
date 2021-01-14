@@ -118,44 +118,44 @@ namespace Foodics.NetSuite.Shared.DAO
                 return db.Query<T>(query).ToList();
             }
         }
-        public void FoodicsIntegration(List<T> list, string extraFields = "")
-        {
+        //public void FoodicsIntegration(List<T> list, string extraFields = "")
+        //{
 
-            string tableName = typeof(T).Name;
-            StringBuilder query = new StringBuilder();
-            for (int i = 0; i < list.Count; i++)
-            {
+        //    string tableName = typeof(T).Name;
+        //    StringBuilder query = new StringBuilder();
+        //    for (int i = 0; i < list.Count; i++)
+        //    {
 
-                try
-                {
-                    T obj = list[i];
+        //        try
+        //        {
+        //            T obj = list[i];
 
-                    string Foodics_ID = (string)obj.GetType().GetProperty("id").GetValue(obj);
-                    var proList = obj.GetType().GetProperties().Where(p => p.CanWrite);
+        //            string Foodics_ID = (string)obj.GetType().GetProperty("id").GetValue(obj);
+        //            var proList = obj.GetType().GetProperties().Where(p => p.CanWrite);
 
-                    query.Append("IF EXISTS(SELECT id FROM [" + tableName + "] WHERE id = '" + Foodics_ID + "') ");
-                    query.Append("  BEGIN UPDATE [" + tableName + "] SET ");
-                    foreach (var pro in proList)
-                        query.Append(" " + pro.Name + "=" + Utility.GetColumnValue(obj, pro.Name) + ", ");
-                    query.Append("       [UpdateDate] = GETDATE()   WHERE [ID] = '" + Foodics_ID + "' ");
-                    query.Append("  END ELSE BEGIN INSERT INTO [" + tableName + "] ( ");
-                    foreach (var pro in proList)
-                        query.Append(" " + pro.Name + ", ");
-                    query.Append("  [UpdateDate],[CreateDate],[Source_Type]) VALUES ( ");
-                    foreach (var pro in proList)
-                        query.Append(" " + Utility.GetColumnValue(obj, pro.Name) + ", ");
-                    query.Append(" GETDATE(),GETDATE()," + (int)Source_Type.Foodics + ") END ");
-                }
-                catch (Exception ex)
-                {
-                }
-            }
-            using (db)
-            {
-                if (!string.IsNullOrEmpty(query.ToString()))
-                    db.Execute(query.ToString());
-            }
-        }
+        //            query.Append("IF EXISTS(SELECT id FROM [" + tableName + "] WHERE id = '" + Foodics_ID + "') ");
+        //            query.Append("  BEGIN UPDATE [" + tableName + "] SET ");
+        //            foreach (var pro in proList)
+        //                query.Append(" " + pro.Name + "=" + Utility.GetColumnValue(obj, pro.Name) + ", ");
+        //            query.Append("       [UpdateDate] = GETDATE()   WHERE [ID] = '" + Foodics_ID + "' ");
+        //            query.Append("  END ELSE BEGIN INSERT INTO [" + tableName + "] ( ");
+        //            foreach (var pro in proList)
+        //                query.Append(" " + pro.Name + ", ");
+        //            query.Append("  [UpdateDate],[CreateDate],[Source_Type]) VALUES ( ");
+        //            foreach (var pro in proList)
+        //                query.Append(" " + Utility.GetColumnValue(obj, pro.Name) + ", ");
+        //            query.Append(" GETDATE(),GETDATE()," + (int)Source_Type.Foodics + ") END ");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //        }
+        //    }
+        //    using (db)
+        //    {
+        //        if (!string.IsNullOrEmpty(query.ToString()))
+        //            db.Execute(query.ToString());
+        //    }
+        //}
         public void BaseNetSuiteIntegration(List<T> list, string extraFields = "")
         {
             string tableName = "";
@@ -375,6 +375,7 @@ namespace Foodics.NetSuite.Shared.DAO
                 }
                 catch (Exception ex)
                 {
+                    throw ex;
                 }
             }
             using (db)
@@ -384,6 +385,59 @@ namespace Foodics.NetSuite.Shared.DAO
             }
         }
 
+        public void FoodicsIntegration(List<T> list)
+        {
+
+            string tableName = typeof(T).Name;
+            StringBuilder query = new StringBuilder();
+            for (int i = 0; i < list.Count; i++)
+            {
+
+                try
+                {
+                    T obj = list[i];
+                    int Subsidiary_Id = 0;
+                    string Foodics_ID = (string)obj.GetType().GetProperty("Foodics_Id").GetValue(obj);
+                    //if (string.IsNullOrEmpty(CheckSubsidiary))
+                    if (obj.GetType().GetProperty("Subsidiary_Id") != null)
+                        Subsidiary_Id = (int)obj.GetType().GetProperty("Subsidiary_Id").GetValue(obj);
+                    var proList = obj.GetType().GetProperties().Where(p => p.CanWrite);
+
+                    query.Append("IF EXISTS(SELECT Foodics_Id FROM [" + tableName + "] WHERE Foodics_Id = '" + Foodics_ID + "'");
+                    if (Subsidiary_Id > 0)
+                        query.Append(" and Subsidiary_Id='" + Subsidiary_Id);
+
+                    query.Append("')");
+                    query.Append("  BEGIN UPDATE [" + tableName + "] SET ");
+                    foreach (var pro in proList)
+                    {
+                        // if (!string.IsNullOrEmpty(Utility.GetColumnValue(obj, pro.Name).ToString()))
+                        if (pro.Name.ToLower() != "id" && pro.Name != "Netsuite_Id")
+                            query.Append(" " + pro.Name + "=" + Utility.GetColumnValue(obj, pro.Name) + ", ");
+                    }
+                    query.Append("       [UpdateDate] = GETDATE()   WHERE [Foodics_Id] = '" + Foodics_ID + "' ");
+                    if (Subsidiary_Id > 0)
+                        query.Append(" and Subsidiary_Id=" + Subsidiary_Id);
+                    query.Append("  END ELSE BEGIN INSERT INTO [" + tableName + "] ( ");
+                    foreach (var pro in proList)
+                        if (pro.Name.ToLower() != "id" && pro.Name != "Netsuite_Id")
+                            query.Append(" " + pro.Name + ", ");
+                    query.Append("  [UpdateDate],[CreateDate]) VALUES ( ");
+                    foreach (var pro in proList)
+                        if (pro.Name.ToLower() != "id" && pro.Name != "Netsuite_Id")
+                            query.Append(" " + Utility.GetColumnValue(obj, pro.Name) + ", ");
+                    query.Append(" GETDATE(),GETDATE()) END ");
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            using (db)
+            {
+                if (!string.IsNullOrEmpty(query.ToString()))
+                    db.Execute(query.ToString());
+            }
+        }
         public void InvoiceDetailsDelete(List<T> list, string extraFields = "")
         {
 

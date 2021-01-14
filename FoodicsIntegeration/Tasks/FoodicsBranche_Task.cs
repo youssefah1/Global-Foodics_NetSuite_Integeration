@@ -89,7 +89,7 @@ namespace FoodicsIntegeration.Tasks
 
                 }
 
-                new GenericeDAO<Location>().NetSuiteIntegration(NetSuitelst);
+                new GenericeDAO<Location>().FoodicsIntegration(NetSuitelst);
             }
             catch (Exception ex)
             {

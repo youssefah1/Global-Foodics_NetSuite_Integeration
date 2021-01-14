@@ -66,8 +66,51 @@ namespace NetSuiteIntegeration.Tasks
                             invoiceObject = new Invoice();
                             invoiceObject.customForm = myCustomForm;
                             //get invoice items
-                            itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere("Invoice_Id =" + invoice_info.Id+ " and isnull(Item_Id,0) >0 ");
+
                             #region invoice items
+                            itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere(" ProductStatus =3 and Invoice_Id =" + invoice_info.Id + " and isnull(Item_Id,0) >0 ");
+                            int DiscountItems = itemLst.Where(x => x.Line_Discount_Amount > 0).Count();
+                            //Define Invoice Items List
+                            int totalItems = itemLst.Count + DiscountItems;
+                            invoiceItems = new InvoiceItem[totalItems];
+
+                            try
+                            {
+                                int arr = 0;
+                                for (int k = 0; k < totalItems; k++)
+                                {
+
+                                    itemDetails = itemLst[arr];
+                                    invoiceItemObject = CreateInvoiceItem(objSetting, itemDetails);
+                                    invoiceItems[k] = invoiceItemObject;
+                                    if (itemDetails.Line_Discount_Amount > 0)
+                                    {
+                                        k++;
+                                        Foodics.NetSuite.Shared.Model.InvoiceItem OtherCharge = new Foodics.NetSuite.Shared.Model.InvoiceItem();
+                                        OtherCharge.Item_Id = 1211;
+                                        OtherCharge.Amount = itemDetails.Line_Discount_Amount * -1;
+                                        OtherCharge.Quantity = 1;
+                                        OtherCharge.Item_Type = "OtherChargeResaleItem";
+                                        invoiceItemObject = CreateInvoiceItem(objSetting, OtherCharge);
+                                        invoiceItems[k] = invoiceItemObject;
+                                    }
+                                    arr++;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
+                            }
+                            //Assign invoive items
+                            items = new InvoiceItemList();
+                            items.item = invoiceItems;
+                            invoiceObject.itemList = items;
+
+                            //GiftCertRedemption
+                            #endregion
+                            #region invoice items old
+                            /*itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere(" ProductStatus =3 and Invoice_Id =" + invoice_info.Id + " and isnull(Item_Id,0) >0 ");//3 is closed
+                            
                             //Define Invoice Items List
                             invoiceItems = new InvoiceItem[itemLst.Count];
                             try
@@ -114,7 +157,9 @@ namespace NetSuiteIntegeration.Tasks
                             items = new InvoiceItemList();
                             items.item = invoiceItems;
                             invoiceObject.itemList = items;
+                            */
                             #endregion
+
                             #region Standard Attributes
                             invoice_date = TimeZoneInfo.ConvertTimeToUtc(invoice_info.Date, TimeZoneInfo.Local);
 
@@ -199,6 +244,39 @@ namespace NetSuiteIntegeration.Tasks
 
 
             return 0;
+        }
+
+        private InvoiceItem CreateInvoiceItem(Setting objSetting, Foodics.NetSuite.Shared.Model.InvoiceItem itemDetails)
+        {
+            RecordRef taxCode, item, unit, price;
+            InvoiceItem invoiceItemObject = new InvoiceItem();
+            taxCode = new RecordRef();
+            taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString();
+            taxCode.type = RecordType.taxAcct;
+            invoiceItemObject.taxCode = taxCode;
+            // item
+            item = new RecordRef();
+            item.internalId = itemDetails.Item_Id.ToString();
+            item.type = (RecordType)Enum.Parse(typeof(RecordType), itemDetails.Item_Type, true);
+            invoiceItemObject.item = item;
+            if (Utility.ConvertToInt(itemDetails.Units) > 0)
+            {
+                unit = new RecordRef();
+                unit.internalId = itemDetails.Units.ToString();
+                unit.type = RecordType.unitsType;
+                invoiceItemObject.units = unit;
+            }
+            // price level
+            #region price level
+            price = new RecordRef();
+            price.type = RecordType.priceLevel;
+            price.internalId = "-1";
+            invoiceItemObject.price = price;
+            invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
+            #endregion
+            invoiceItemObject.quantitySpecified = true;
+            invoiceItemObject.quantity = itemDetails.Quantity;
+            return invoiceItemObject;
         }
 
         private void UpdatedInvoice(List<Foodics.NetSuite.Shared.Model.Invoice> InvoiceLst, WriteResponseList responseLst)

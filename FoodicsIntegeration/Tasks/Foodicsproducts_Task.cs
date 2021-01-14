@@ -74,15 +74,12 @@ namespace FoodicsIntegeration.Tasks
             try
             {
                 List<Item> NetSuitelst = new List<Item>();
-                List<Inventory> NetSuiteInventorylst = new List<Inventory>();
-                List<ItemPrice> NetSuiteItemPricelst = new List<ItemPrice>();
+               // List<Inventory> NetSuiteInventorylst = new List<Inventory>();
+                //List<ItemPrice> NetSuiteItemPricelst = new List<ItemPrice>();
                 List<ItemCompnent> ItemCompnentList = new List<ItemCompnent>();
-
                 foreach (var Foodicsitem in lstitems)
                 {
-
                     Item Netsuiteitem = new Item();
-
                     Item itemobj = new GenericeDAO<Item>().GetByFoodicsId(Foodicsitem.id);
                     //barcode
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
@@ -96,37 +93,20 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Img = Foodicsitem.image;
                     Netsuiteitem.Price = (double)Foodicsitem.price;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
-                    // Netsuiteitem.Unit_Type = Foodicsitem.storage_unit;
-                    //Netsuiteitem.Stock_Unit = Foodicsitem.;
-                    //Netsuiteitem.Purchase_Unit = Foodicsitem.storage_unit;
-                    //Netsuiteitem.Sales_Unit = Foodicsitem.storage_unit;
-                    //Netsuiteitem.Base_Unit = Foodicsitem.storage_unit;
-
-
                     if (Foodicsitem.category != null && !string.IsNullOrEmpty(Foodicsitem.category.id))
                     {
                         Categories obj = new GenericeDAO<Categories>().GetByFoodicsId(Foodicsitem.category.id);
                         Netsuiteitem.Category_Id = obj.Netsuite_Id;
                     }
-                    else
-                    {
-                        Netsuiteitem.Category_Id = 0;
-
-                    }
-
                     foreach (var ingredientsobj in Foodicsitem.ingredients)
                     {
                         Item itemcomponent = new GenericeDAO<Item>().GetByFoodicsId(ingredientsobj.id);
                         if (itemcomponent != null)//&& itemcomponent.Netsuite_Id > 0)
                         {
                             ItemCompnent objitmcom = new ItemCompnent();
-
-
-
                             objitmcom.UnitId = 0;//Utility.ConvertToInt(itemobj.memberUnit);
                             objitmcom.UnitName = ingredientsobj.ingredient_unit;
                             objitmcom.Quantity = ingredientsobj.pivot.quantity;
-
                             if (itemcomponent.Netsuite_Id > 0)
                                 objitmcom.ComponentId = itemcomponent.Netsuite_Id;
                             else
@@ -140,43 +120,26 @@ namespace FoodicsIntegeration.Tasks
                                 objitmcom.ItemId = 0;//Utility.ConvertToInt(Assitem.internalId);
 
                             ItemCompnentList.Add(objitmcom);
-
-
-
-
-
-
                         }
                     }
 
-                    Inventory NetsuiteInventroy = new Inventory();
-                    NetsuiteInventroy.Foodics_Id = Foodicsitem.id;
-                    NetsuiteInventroy.SerialNumbers = Foodicsitem.barcode;
-                    //NetsuiteInventroy.QuantityOnHand =Convert.ToDouble( Foodicsitem.storage_unit);
+                    //Inventory NetsuiteInventroy = new Inventory();
+                    //NetsuiteInventroy.Foodics_Id = Foodicsitem.id;
+                    //NetsuiteInventroy.SerialNumbers = Foodicsitem.barcode;
 
-
-
-                    ItemPrice NetsuiteItemPrice = new ItemPrice();
-                    NetsuiteItemPrice.Foodics_Id = Foodicsitem.id;
-                    NetsuiteItemPrice.Price = (float)Foodicsitem.cost;
-                    NetsuiteItemPrice.Price_Level_Id = 0;
+                    //ItemPrice NetsuiteItemPrice = new ItemPrice();
+                    //NetsuiteItemPrice.Foodics_Id = Foodicsitem.id;
+                    //NetsuiteItemPrice.Price = (float)Foodicsitem.cost;
+                    //NetsuiteItemPrice.Price_Level_Id = 0;
 
                     NetSuitelst.Add(Netsuiteitem);
-
-                    NetSuiteInventorylst.Add(NetsuiteInventroy);
-                    NetSuiteItemPricelst.Add(NetsuiteItemPrice);
-
-
-
-
+                    //NetSuiteInventorylst.Add(NetsuiteInventroy);
+                    //NetSuiteItemPricelst.Add(NetsuiteItemPrice);
                 }
 
-
-
-
-                new GenericeDAO<Item>().NetSuiteIntegration(NetSuitelst);
-                new GenericeDAO<Inventory>().NetSuiteIntegration(NetSuiteInventorylst);
-                new GenericeDAO<ItemPrice>().NetSuiteIntegration(NetSuiteItemPricelst);
+                new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst);
+                //new GenericeDAO<Inventory>().NetSuiteIntegration(NetSuiteInventorylst);
+                //new GenericeDAO<ItemPrice>().NetSuiteIntegration(NetSuiteItemPricelst);
                 new GenericeDAO<ItemCompnent>().ItemcompnentFoodicsIntegration(ItemCompnentList);
                 //string Itemids = "'";
                 //Itemids += string.Join("','", NetSuitelst.Select(x => x.Foodics_Id).Distinct().ToArray());

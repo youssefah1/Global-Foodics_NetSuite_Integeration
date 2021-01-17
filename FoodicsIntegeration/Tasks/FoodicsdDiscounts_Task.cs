@@ -55,7 +55,7 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Amount = Foodicsitem.amount;
                     Netsuiteitem.IsPercentage = Foodicsitem.is_percentage;
                     Netsuiteitem.IsTaxable = Foodicsitem.is_taxable;
-                    Netsuiteitem.InActive = Foodicsitem.deleted_at != null ? false : true;
+                    Netsuiteitem.InActive = Foodicsitem.deleted_at.Year >1 ? true : false;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
                     NetSuitelst.Add(Netsuiteitem);
                 }

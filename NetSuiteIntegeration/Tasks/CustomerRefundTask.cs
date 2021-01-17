@@ -81,10 +81,10 @@ namespace NetSuiteIntegeration.Tasks
 
                         #region payment Method
 
-                        //RecordRef payment_method = new RecordRef();
-                        //payment_method.internalId = "1";//payobj.Payment_Method_Id.ToString();
-                        //payment_method.type = RecordType.customerPayment;
-                        //memo.paymentMethod = payment_method;
+                        RecordRef payment_method = new RecordRef();
+                        payment_method.internalId = "1";//payobj.Payment_Method_Id.ToString();
+                        payment_method.type = RecordType.customerPayment;
+                        memo.paymentMethod = payment_method;
 
 
                         #endregion

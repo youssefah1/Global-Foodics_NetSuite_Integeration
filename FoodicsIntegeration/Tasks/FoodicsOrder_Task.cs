@@ -159,6 +159,7 @@ namespace FoodicsIntegeration.Tasks
                             Netsuiteitem.CreatedBy = Foodicsitem.creator.name;
 
                         }
+                        Netsuiteitem.Invoice_Discount_Type = Foodicsitem.discount_type;
                         Netsuiteitem.Total_Discount = (float)Foodicsitem.discount_amount;
                         Netsuiteitem.Date = Foodicsitem.business_date;
                         Netsuiteitem.AsOfDate = Foodicsitem.created_at;

@@ -27,6 +27,7 @@ namespace Foodics.NetSuite.Shared.Model
         public int Terminal_Id { get; set; }
         public int Cashier { get; set; }
         public int Discount_Id { get; set; }
+        
         public int Order_Status { get; set; }//4 closed,5 Returned
         public float Tax { get; set; }
         public float Net_Payable { get; set; }

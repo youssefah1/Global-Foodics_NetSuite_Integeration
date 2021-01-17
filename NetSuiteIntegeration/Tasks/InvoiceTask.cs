@@ -48,14 +48,13 @@ namespace NetSuiteIntegeration.Tasks
                     InvoiceItem invoiceItemObject;
                     InvoiceItemList items;
 
-                    RecordRef taxCode, item, unit, price, 
-                              subsid, currency, entity, location;
-                    StringCustomFieldRef  FoodicsRef, FoodicsNumb;
+                    RecordRef subsid, currency, entity, location;
+                    StringCustomFieldRef FoodicsRef, FoodicsNumb, CreatedBy, Source, orderDiscount;
                     CustomFieldRef[] customFieldRefArray;
-                    RecordRef myCustomForm = new RecordRef();
-                    myCustomForm.type = RecordType.invoice;
-                    myCustomForm.typeSpecified = true;
-                    myCustomForm.internalId = "196";
+                    //RecordRef myCustomForm = new RecordRef();
+                    //myCustomForm.type = RecordType.invoice;
+                    //myCustomForm.typeSpecified = true;
+                    //myCustomForm.internalId = "196";
                     #endregion
                     for (int i = 0; i < invoiceLst.Count; i++)
                     {
@@ -64,11 +63,13 @@ namespace NetSuiteIntegeration.Tasks
                             invoice_info = invoiceLst[i];
                             Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + invoice_info.Subsidiary_Id).FirstOrDefault();
                             invoiceObject = new Invoice();
-                            invoiceObject.customForm = myCustomForm;
+                            //invoiceObject.customForm = myCustomForm;
                             //get invoice items
 
                             #region invoice items
-                            itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere(" ProductStatus =3 and Invoice_Id =" + invoice_info.Id + " and isnull(Item_Id,0) >0 ");
+                            itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere(" ProductStatus =3 and Invoice_Id =" + invoice_info.Id + " and isnull(Item_Id,0) >0 ");//Completed order
+                                                                                                                                                                                                   //if (itemLst.Count > 0)
+                                                                                                                                                                                                   //{
                             int DiscountItems = itemLst.Where(x => x.Line_Discount_Amount > 0).Count();
                             //Define Invoice Items List
                             int totalItems = itemLst.Count + DiscountItems;
@@ -85,10 +86,13 @@ namespace NetSuiteIntegeration.Tasks
                                     invoiceItems[k] = invoiceItemObject;
                                     if (itemDetails.Line_Discount_Amount > 0)
                                     {
+                                        float Discount = itemDetails.Line_Discount_Amount;
+                                        if (itemDetails.Line_Discount_Amount != itemDetails.Amount)
+                                            Discount = itemDetails.Amount;
                                         k++;
                                         Foodics.NetSuite.Shared.Model.InvoiceItem OtherCharge = new Foodics.NetSuite.Shared.Model.InvoiceItem();
-                                        OtherCharge.Item_Id = 1211;
-                                        OtherCharge.Amount = itemDetails.Line_Discount_Amount * -1;
+                                        OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id; //1211;
+                                        OtherCharge.Amount = Discount * -1;
                                         OtherCharge.Quantity = 1;
                                         OtherCharge.Item_Type = "OtherChargeResaleItem";
                                         invoiceItemObject = CreateInvoiceItem(objSetting, OtherCharge);
@@ -110,7 +114,7 @@ namespace NetSuiteIntegeration.Tasks
                             #endregion
                             #region invoice items old
                             /*itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere(" ProductStatus =3 and Invoice_Id =" + invoice_info.Id + " and isnull(Item_Id,0) >0 ");//3 is closed
-                            
+
                             //Define Invoice Items List
                             invoiceItems = new InvoiceItem[itemLst.Count];
                             try
@@ -189,7 +193,7 @@ namespace NetSuiteIntegeration.Tasks
                             location.internalId = invoice_info.Location_Id.ToString(); //objSetting.Location_Netsuite_Id.ToString();
                             location.type = RecordType.location;
                             invoiceObject.location = location;
-                            
+
                             if (invoice_info.Sales_Rep_Id > 0)
                             {
                                 RecordRef sales_rep = new RecordRef();
@@ -200,8 +204,42 @@ namespace NetSuiteIntegeration.Tasks
                             #endregion
 
                             #region Discount
-                            invoiceObject.discountRate = (Math.Round(invoice_info.Total_Discount, 3) * -1).ToString();
+                            if (invoice_info.Total_Discount > 0)
+                            {
+                                RecordRef discountitem = new RecordRef();
+                                discountitem.type = RecordType.discountItem;
+                                invoiceObject.discountItem = discountitem;
+
+                                invoiceObject.discountRate = (Math.Round((invoice_info.Total_Discount / 1.15), 3) * -1).ToString();
+                                if (invoice_info.Discount_Id > 0)
+                                    discountitem.internalId = invoice_info.Discount_Id.ToString();
+                                else
+                                    discountitem.internalId = objSetting.DiscountItem_Netsuite_Id.ToString();
+                            }
+                            else
+                                invoiceObject.discountRate = "0";
+
+
+                            //lineDiscount = new DoubleCustomFieldRef();
+                            //lineDiscount.scriptId = "custbody_da_pos_line_item_discount";
+                            //lineDiscount.value = 0 * -1;
+
+                            orderDiscount = new StringCustomFieldRef();
+                            orderDiscount.scriptId = "custbody_da_invoice_discount";
+                            orderDiscount.value = invoice_info.Total_Discount.ToString();
+                            //if (invoice_info.Invoice_Discount_Type == 1)
+                            //    orderDiscount.value = (Math.Round(invoice_info.Invoice_Discount_Rate, 3) * -1).ToString() + "%";
+
+                            if (invoice_info.Accounting_Discount_Item != 0)
+                            {
+                                RecordRef discItem = new RecordRef();
+                                discItem.internalId = invoice_info.Accounting_Discount_Item.ToString();
+                                discItem.type = RecordType.discountItem;
+                                invoiceObject.discountItem = discItem;
+                            }
                             #endregion
+
+
 
                             #region Invoice Custom Attributes
                             FoodicsRef = new StringCustomFieldRef();
@@ -212,13 +250,30 @@ namespace NetSuiteIntegeration.Tasks
                             FoodicsNumb.scriptId = "custbody_da_foodics_number";
                             FoodicsNumb.value = invoice_info.Number.ToString();
 
-                            customFieldRefArray = new CustomFieldRef[2];
-                            customFieldRefArray[0] = FoodicsRef;
-                            customFieldRefArray[1] = FoodicsNumb;
-                            
+                            CreatedBy = new StringCustomFieldRef();
+                            CreatedBy.scriptId = "custbody_da_foodics_createdby";
+                            CreatedBy.value = invoice_info.CreatedBy.ToString();
+
+                            Source = new StringCustomFieldRef();
+                            Source.scriptId = "custbody_da_foodics_source";
+                            Source.value = invoice_info.Source.ToString();
+
+                            customFieldRefArray = new CustomFieldRef[5];
+                            customFieldRefArray[0] = orderDiscount;
+                            customFieldRefArray[1] = FoodicsRef;
+                            customFieldRefArray[2] = FoodicsNumb;
+                            customFieldRefArray[3] = CreatedBy;
+                            customFieldRefArray[4] = Source;
+
                             invoiceObject.customFieldList = customFieldRefArray;
                             #endregion
                             InvoiceArr[i] = invoiceObject;
+                            //}
+                            //else
+
+                            //{
+                            //    invoiceLst.RemoveAt(i);
+                            //}
                         }
                         catch (Exception ex)
                         {

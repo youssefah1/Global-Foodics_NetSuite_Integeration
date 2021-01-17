@@ -54,6 +54,7 @@ namespace NetSuiteIntegeration.Tasks
                         currency.internalId = objSetting.Currency_Netsuite_Id.ToString();//payobj.Currency_Id.ToString();
                         currency.type = RecordType.currency;
                         cp.currency = currency;
+                        StringCustomFieldRef FoodicsRef, FoodicsNumb;
 
                         //exchangeRate
                         // cp.exchangeRate = payobj.Exchange_Rate;
@@ -113,10 +114,20 @@ namespace NetSuiteIntegeration.Tasks
                         trans_id.scriptId = "custbody_da_transaction_id";
                         trans_id.value = invoiceobj.Netsuite_Id;
 
-                        CustomFieldRef[] customFieldRefArray = new CustomFieldRef[3];
+                        FoodicsRef = new StringCustomFieldRef();
+                        FoodicsRef.scriptId = "custbody_da_foodics_reference";
+                        FoodicsRef.value = invoiceobj.BarCode.ToString();
+
+                        FoodicsNumb = new StringCustomFieldRef();
+                        FoodicsNumb.scriptId = "custbody_da_foodics_number";
+                        FoodicsNumb.value = invoiceobj.Number.ToString();
+
+                        CustomFieldRef[] customFieldRefArray = new CustomFieldRef[5];
                         customFieldRefArray[0] = trans_id;
                         customFieldRefArray[1] = payPercent;
                         customFieldRefArray[2] = PayPercentAmount;
+                        customFieldRefArray[3] = FoodicsRef;
+                        customFieldRefArray[4] = FoodicsNumb;
 
                         cp.customFieldList = customFieldRefArray;
                         #endregion
@@ -133,6 +144,13 @@ namespace NetSuiteIntegeration.Tasks
                         payApply[0].total = payobj.Amount;
                         payApply[0].amount = payobj.Amount;
                         payApply[0].applyDate = payobj.Business_Date;
+                        #endregion
+
+                        #region Invoice Custom Attributes
+                      
+
+                       
+
                         #endregion
 
                         // payment method

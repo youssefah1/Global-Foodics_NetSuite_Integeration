@@ -93,6 +93,7 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Img = Foodicsitem.image;
                     Netsuiteitem.Price = (double)Foodicsitem.price;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
+                    Netsuiteitem.FoodicsUpdateDate = Foodicsitem.updated_at;
                     if (Foodicsitem.category != null && !string.IsNullOrEmpty(Foodicsitem.category.id))
                     {
                         Categories obj = new GenericeDAO<Categories>().GetByFoodicsId(Foodicsitem.category.id);

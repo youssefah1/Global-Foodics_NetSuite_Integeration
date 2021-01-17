@@ -38,7 +38,8 @@ namespace Foodics.NetSuite.Shared.Model
 		//public DateTime CreateDate { get; set; }
 		public int Days_Before_Expiration { get; set; }
 		public string Foodics_Id { get; set; }
-
+		public DateTime FoodicsUpdateDate { get; set; }
+		
 		public Double Price { get; set; }
 
 	}

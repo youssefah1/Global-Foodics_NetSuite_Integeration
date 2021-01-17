@@ -12,7 +12,8 @@ namespace Foodics.NetSuite.Shared.Model
         public int Currency_Netsuite_Id { get; set; }
         public int Customer_Netsuite_Id { get; set; }
         public int Subsidiary_Netsuite_Id { get; set; }
-
+        
+            public int OtherChargeItem_Netsuite_Id { get; set; }
         public int TaxCode_Netsuite_Id { get; set; }
 
         public int Item_Tmp_Netsuite_Id { get; set; }
@@ -28,7 +29,8 @@ namespace Foodics.NetSuite.Shared.Model
         public int TaxSchedule_Netsuite_Id { get; set; }
         public bool InActive { get; set; }
         public int DiscountAccount_Netsuite_Id { get; set; }
-
+        public int DiscountItem_Netsuite_Id { get; set; }
+        
         public float TaxRate { get; set; }
         public class integerate
         {

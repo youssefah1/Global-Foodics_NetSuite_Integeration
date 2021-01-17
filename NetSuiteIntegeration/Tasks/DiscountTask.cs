@@ -19,7 +19,7 @@ namespace NetSuiteIntegeration.Tasks
             try
             {
                 new CustomDAO().Check_PaymentCash_Exist();
-                List<Foodics.NetSuite.Shared.Model.Discount> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Discount>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0)");
+                List<Foodics.NetSuite.Shared.Model.Discount> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Discount>().GetWhere(" InActive = 0 and (Netsuite_Id IS NULL or Netsuite_Id =0)");
                 if (Lst_Items.Count <= 0)
                     return 0;
                 com.netsuite.webservices.DiscountItem[] ItemArr = new com.netsuite.webservices.DiscountItem[Lst_Items.Count];

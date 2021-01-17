@@ -88,6 +88,7 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Storage_Unit = Foodicsitem.storage_unit;
                     Netsuiteitem.Ingredient_Unit = Foodicsitem.ingredient_unit;
                     Netsuiteitem.storage_to_ingredient_factor = Foodicsitem.storage_to_ingredient_factor;
+                    Netsuiteitem.FoodicsUpdateDate = Foodicsitem.updated_at;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
                     //if (!Netsuiteitem.InActive)
                     //{

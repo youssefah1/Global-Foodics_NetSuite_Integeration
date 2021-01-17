@@ -11,18 +11,25 @@ using System.Threading.Tasks;
 
 namespace Foodics.NetSuite.Shared.DAO
 {
-    public class CustomDAO:BaseDAO
+    public class CustomDAO : BaseDAO
     {
         public List<Invoice> SelectInvoice(int Order_Status)
         {
-            string query = @" SELECT     distinct top(200)  Invoice.*
+            StringBuilder query = new StringBuilder();
+            //ProductStatus =3 closed product
+            query.Append(@" SELECT     distinct top(200)  Invoice.*
                          FROM            Invoice
-						 where Invoice.Id in (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) >0 )
-						 and Order_Status=" + Order_Status + " and (Invoice.Netsuite_Id IS NULL or Invoice.Netsuite_Id =0) ";
+						 where Invoice.Id in (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) >0 ");
+
+            if (Order_Status == 4)
+                query.Append(@" and  ProductStatus =3");
+            query.Append(" )and Order_Status=" + Order_Status + " and (Invoice.Netsuite_Id IS NULL or Invoice.Netsuite_Id =0) ");
+
+            //query.Append(" and Location_Id = 205 ");
 
             using (db)
             {
-                return db.Query<Invoice>(query).ToList();
+                return db.Query<Invoice>(query.ToString()).ToList();
             }
         }
         public List<PaymentMethodEntity> SelectCustomerPayment(int Order_Status)
@@ -117,7 +124,7 @@ namespace Foodics.NetSuite.Shared.DAO
                         INNER JOIN Item ON invitem.FoodicsItem_Id = item.Foodics_Id
                         WHERE ISNULL(invitem.Item_Id, 0) = 0");
 
-          
+
             using (db)
             {
                 db.ExecuteScalar(query.ToString());
@@ -141,25 +148,26 @@ namespace Foodics.NetSuite.Shared.DAO
         public void GenerateAssemblyBuild()
         {
             StringBuilder query = new StringBuilder();
-            query.Append(@" SELECT InvoiceItem.Id, Invoice.Location_Id,InvoiceItem.Item_Id, InvoiceItem.Quantity
+            query.Append(@" SELECT InvoiceItem.Id, Invoice.Location_Id,Invoice.Subsidiary_Id,InvoiceItem.Item_Id, InvoiceItem.Quantity
                             INTO #Assembly
                             FROM InvoiceItem INNER JOIN invoice ON InvoiceItem.Invoice_Id = Invoice.Id
                             AND ISNULL(InvoiceItem.AssemblyBuilt, 0) = 0
                             AND ISNULL(Invoice.Netsuite_Id, 0) > 0
-                            AND ISNULL(InvoiceItem.Item_Id, 0) > 0
+                            AND Invoice.Order_Status=4
 
                             INSERT INTO[dbo].[AssemblyBuild]
                                        (
 
-                                        [Location_Id]
+                                        [Location_Id],
+										[Subsidiary_Id]
                                        ,[Item_Id]
                                        ,[Quantity]
                                        ,[InActive]
                                        ,[UpdateDate]
                                        ,[CreateDate])
-                            SELECT ass.Location_Id, ass.Item_Id, SUM(ass.Quantity), 0, GETDATE(), GETDATE()
+                            SELECT ass.Location_Id,ass.Subsidiary_Id, ass.Item_Id, SUM(ass.Quantity), 0, GETDATE(), GETDATE()
                             FROM #Assembly ass
-                            GROUP BY ass.Location_Id, ass.Item_Id
+                            GROUP BY ass.Subsidiary_Id,ass.Location_Id, ass.Item_Id
 
                             UPDATE InvoiceItem
                                 SET AssemblyBuilt = 1
@@ -176,7 +184,7 @@ namespace Foodics.NetSuite.Shared.DAO
         }
 
 
-        
+
         //public void UpdateCompnentitemID()
         //{
         //    StringBuilder query = new StringBuilder();
@@ -196,7 +204,7 @@ namespace Foodics.NetSuite.Shared.DAO
         {
             StringBuilder query = new StringBuilder();
             query.Append(@"update [dbo].[UnitsOfMeasureIngredient] 
-                            set NetSuiteID =1 where UnitsOfMeasure_Id in ("+ids+")");
+                            set NetSuiteID =1 where UnitsOfMeasure_Id in (" + ids + ")");
             using (db)
             {
                 db.ExecuteScalar(query.ToString());
@@ -235,7 +243,7 @@ namespace Foodics.NetSuite.Shared.DAO
             query.Append(" else begin  SELECT id FROM UnitsOfMeasure WHERE conversionRate=1 and unitName = '" + unitName + "' end; ");
             using (db)
             {
-                return Utility.ConvertToInt( db.ExecuteScalar(query.ToString()).ToString());
+                return Utility.ConvertToInt(db.ExecuteScalar(query.ToString()).ToString());
             }
 
         }
@@ -243,7 +251,7 @@ namespace Foodics.NetSuite.Shared.DAO
         public void Check_Create_unitName_ingredient(UnitsOfMeasureIngredient obj)
         {
             StringBuilder query = new StringBuilder();
-            query.Append("IF NOT EXISTS(SELECT id FROM UnitsOfMeasureIngredient WHERE Storage_To_Ingredient_Value='"+ obj.Storage_To_Ingredient_Value + "' and unitName = '" + obj.unitName + "' and UnitsOfMeasure_Id="+obj.UnitsOfMeasure_Id+" )");
+            query.Append("IF NOT EXISTS(SELECT id FROM UnitsOfMeasureIngredient WHERE Storage_To_Ingredient_Value='" + obj.Storage_To_Ingredient_Value + "' and unitName = '" + obj.unitName + "' and UnitsOfMeasure_Id=" + obj.UnitsOfMeasure_Id + " )");
             query.Append(" begin insert into UnitsOfMeasureIngredient (UnitsOfMeasure_Id,unitName,Storage_To_Ingredient_Value,InActive,UpdateDate,CreateDate)");
             query.Append(" values('" + obj.UnitsOfMeasure_Id + "','" + obj.unitName + "','" + obj.Storage_To_Ingredient_Value + "','False',GETDATE(),GETDATE()) end ");
             using (db)
@@ -253,7 +261,7 @@ namespace Foodics.NetSuite.Shared.DAO
 
         }
 
-       
+
 
 
     }

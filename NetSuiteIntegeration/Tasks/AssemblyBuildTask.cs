@@ -71,7 +71,7 @@ namespace NetSuiteIntegeration.Tasks
             {
                 new CustomDAO().GenerateAssemblyBuild();
                 //get recentrly added invoices after creating the return
-                List<Foodics.NetSuite.Shared.Model.AssemblyBuild> ColLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>().GetWhere(" Netsuite_Id IS NULL or Netsuite_Id =0").Take(200).ToList();
+                List<Foodics.NetSuite.Shared.Model.AssemblyBuild> ColLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>().GetWhere(" item_id >0 and (Netsuite_Id IS NULL or Netsuite_Id =0)").Take(200).ToList();
                 bool result = true;
                 if (ColLst.Count > 0)
                 {
@@ -87,8 +87,6 @@ namespace NetSuiteIntegeration.Tasks
                         try
                         {
                             Obj_info = ColLst[i];
-                            Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj_info.Subsidiary_Id).FirstOrDefault();
-
                             //Netsuite invoice type
                             AssemblyBuildObject = new com.netsuite.webservices.AssemblyBuild();
                             AssemblyBuildObject.quantity = Obj_info.Quantity;
@@ -106,7 +104,7 @@ namespace NetSuiteIntegeration.Tasks
                             AssemblyBuildObject.location = location;
 
                             subsid = new RecordRef();
-                            subsid.internalId = objSetting.Subsidiary_Netsuite_Id.ToString();
+                            subsid.internalId = Obj_info.Subsidiary_Id.ToString();
                             subsid.type = RecordType.subsidiary;
                             AssemblyBuildObject.subsidiary = subsid;
                           

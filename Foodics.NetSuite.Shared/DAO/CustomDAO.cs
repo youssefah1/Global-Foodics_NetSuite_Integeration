@@ -86,7 +86,7 @@ namespace Foodics.NetSuite.Shared.DAO
 
         public List<AdjustmentBuild> SelectAdjustmentLocation()
         {
-            string query = @" SELECT     distinct top(200)  Location_Id,Subsidiary_Id
+            string query = @" SELECT     distinct top(200)  *
                          FROM            AdjustmentBuild
 						 where  (Netsuite_Id IS NULL or Netsuite_Id =0) ";
 

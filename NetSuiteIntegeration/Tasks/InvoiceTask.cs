@@ -87,8 +87,8 @@ namespace NetSuiteIntegeration.Tasks
                                     if (itemDetails.Line_Discount_Amount > 0)
                                     {
                                         float Discount = itemDetails.Line_Discount_Amount;
-                                        if (itemDetails.Line_Discount_Amount != itemDetails.Amount)
-                                            Discount = itemDetails.Amount;
+                                        //if (itemDetails.Line_Discount_Amount != itemDetails.Amount)
+                                        //    Discount = itemDetails.Amount;
                                         k++;
                                         Foodics.NetSuite.Shared.Model.InvoiceItem OtherCharge = new Foodics.NetSuite.Shared.Model.InvoiceItem();
                                         OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id; //1211;

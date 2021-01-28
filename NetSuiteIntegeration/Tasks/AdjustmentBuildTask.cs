@@ -53,7 +53,8 @@ namespace NetSuiteIntegeration.Tasks
                             Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj_info.Subsidiary_Id).FirstOrDefault();
 
                             AdjustBuildObject.tranDateSpecified = true;
-                            AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
+                            //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
+                            AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021,01,07), TimeZoneInfo.Local);
 
                             // adjustment account
                             RecordRef adjustment_account = new RecordRef();
@@ -150,7 +151,7 @@ namespace NetSuiteIntegeration.Tasks
                             //update netsuiteId property
                             InvoiceLst[counter].Netsuite_Id = Convert.ToInt32(rf.internalId.ToString());
                             //add item to the tuple
-                            iDs.Add(new Tuple<int, string>(Convert.ToInt32(rf.internalId.ToString()), InvoiceLst[counter].Location_Id.ToString()));
+                            iDs.Add(new Tuple<int, string>(Convert.ToInt32(rf.internalId.ToString()), InvoiceLst[counter].id.ToString()));
                         }
                         catch (Exception ex)
                         {
@@ -161,7 +162,7 @@ namespace NetSuiteIntegeration.Tasks
 
 
                 GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild> objDAO = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>();
-                objDAO.MainUpdateNetsuiteIDs(iDs, "AdjustmentBuild", "Location_Id");
+                objDAO.MainUpdateNetsuiteIDs(iDs, "AdjustmentBuild");
             }
             catch (Exception ex)
             {

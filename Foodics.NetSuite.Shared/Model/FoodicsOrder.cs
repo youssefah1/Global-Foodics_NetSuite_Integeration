@@ -64,7 +64,7 @@ namespace Foodics.NetSuite.Shared.Model
 		public int status { get; set; }
 		public string kitchen_notes { get; set; }
 		public bool is_ingredients_wasted { get; set; }
-
+		public List<options> options { get; set; }
 
 	}
 
@@ -116,6 +116,22 @@ namespace Foodics.NetSuite.Shared.Model
 	{
 
 		public string id { get; set; }
+	}
+	public class options
+	{
+
+		public int quantity { get; set; }
+		public decimal unit_price { get; set; }
+		public decimal total_price { get; set; }
+		public modifier_option modifier_option { get; set; }
+	}
+	public class modifier_option
+	{
+
+		public string id { get; set; }
+		public string name { get; set; }
+		public string sku { get; set; }
+		
 	}
 
 }

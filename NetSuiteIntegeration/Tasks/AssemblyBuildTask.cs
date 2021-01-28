@@ -29,42 +29,6 @@ namespace NetSuiteIntegeration.Tasks
             /// after that get all item info and save in DB.</summary>	
 
         }
-        private RecordType GetRecordType(string recType)
-        {
-            RecordType rType = new RecordType();
-            switch (recType)
-            {
-                case "InventoryItem":
-                    rType = RecordType.inventoryItem;
-                    break;
-                case "LotNumberedInventoryItem":
-                    rType = RecordType.lotNumberedInventoryItem;
-                    break;
-                case "SerializedInventoryItem":
-                    rType = RecordType.serializedInventoryItem;
-                    break;
-                case "KitItem":
-                    rType = RecordType.kitItem;
-                    break;
-                case "ItemGroup":
-                    rType = RecordType.itemGroup;
-                    break;
-                case "AssemblyItem":
-                    rType = RecordType.assemblyItem;
-                    break;
-                case "LotNumberedAssemblyItem":
-                    rType = RecordType.lotNumberedAssemblyItem;
-                    break;
-                case "SerializedAssemblyItem":
-                    rType = RecordType.serializedAssemblyItem;
-                    break;
-                default:
-                    break;
-            }
-            return rType;
-
-        }
-
         public override Int64 Set(string parametersArr)
         {
             try

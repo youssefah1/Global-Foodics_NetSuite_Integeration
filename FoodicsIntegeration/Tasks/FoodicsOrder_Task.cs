@@ -30,7 +30,7 @@ namespace FoodicsIntegeration.Tasks
             //}
             //while (fromDate <= DateTime.Now)
             //{
-            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,products.product,products.discount,payments.payment_method" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[id]=0560261f-9a4f-4638-97a8-bf8e89c54c1c" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
             string NextPage = MainURL;
 
             LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd"));
@@ -101,9 +101,9 @@ namespace FoodicsIntegeration.Tasks
                 foreach (var Foodicsitem in lstitems)
                 {
 
-                    List<Foodics.NetSuite.Shared.Model.Invoice> invoiceLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.Invoice>().GetWhere(" Foodics_Id = '" + Foodicsitem.id + "'");
-                    if (invoiceLst.Count == 0 || (invoiceLst.Count > 0 && Utility.ConvertToInt(invoiceLst[0].Netsuite_Id.ToString()) <= 0))
-                    {
+                    //List<Foodics.NetSuite.Shared.Model.Invoice> invoiceLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.Invoice>().GetWhere(" Foodics_Id = '" + Foodicsitem.id + "'");
+                    //if (invoiceLst.Count == 0 || (invoiceLst.Count > 0 && Utility.ConvertToInt(invoiceLst[0].Netsuite_Id.ToString()) <= 0))
+                    //{
                         Invoice Netsuiteitem = new Invoice();
                         //barcode
                         Netsuiteitem.Foodics_Id = Foodicsitem.id;
@@ -183,14 +183,14 @@ namespace FoodicsIntegeration.Tasks
                                 InvoiceItem Netsuiteinvoiceitem = new InvoiceItem();
                                 Netsuiteinvoiceitem.Foodics_Id = Foodicsitem.id;
                                 Netsuiteinvoiceitem.FoodicsItem_Id = prodobj.Product.id;
-                                if (itemobj.Netsuite_Id > 0)
+                                if (itemobj!= null && itemobj.Netsuite_Id > 0)
                                     Netsuiteinvoiceitem.Item_Id = itemobj.Netsuite_Id;
                                 else
                                     Netsuiteinvoiceitem.Item_Id = 0;
                                 Netsuiteinvoiceitem.Item_Name = itemobj.Name_En;
                                 Netsuiteinvoiceitem.Item_Code = itemobj.UPC_Code;
 
-                                Netsuiteinvoiceitem.Item_Type = ((Item_Type)itemobj.Item_Type).ToString(); //Enum.GetName(typeof(Item_Type), itemobj.Item_Type);  ;
+                                Netsuiteinvoiceitem.Item_Type = ((Item_Type)itemobj.Item_Type).ToString(); 
 
                                 Netsuiteinvoiceitem.Quantity = prodobj.quantity;
                                 Netsuiteinvoiceitem.Amount = (float)prodobj.unit_price;
@@ -199,10 +199,36 @@ namespace FoodicsIntegeration.Tasks
                                 Netsuiteinvoiceitem.Is_Ingredients_Wasted = prodobj.is_ingredients_wasted;
                                 Netsuiteinvoiceitem.ProductStatus = prodobj.status;
                                 InvoiceItemlst.Add(Netsuiteinvoiceitem);
-                            }
 
-                            //}
-                        }
+                                foreach (var optionitem in prodobj.options)
+                                {
+                                    Item optionitemobj = new GenericeDAO<Item>().GetByFoodicsId(optionitem.modifier_option.id);
+                                    InvoiceItem NetsuiteInvoiceOptionItem = new InvoiceItem();
+                                    NetsuiteInvoiceOptionItem.Foodics_Id = Foodicsitem.id;
+                                    NetsuiteInvoiceOptionItem.FoodicsItem_Id = optionitem.modifier_option.id;
+                                    if (optionitemobj != null && optionitemobj.Netsuite_Id > 0)
+                                        NetsuiteInvoiceOptionItem.Item_Id = optionitemobj.Netsuite_Id;
+                                    else
+                                        NetsuiteInvoiceOptionItem.Item_Id = 0;
+
+                                    NetsuiteInvoiceOptionItem.Item_Name = optionitem.modifier_option.name;
+                                    NetsuiteInvoiceOptionItem.Item_Code = optionitem.modifier_option.sku;
+
+                                    NetsuiteInvoiceOptionItem.Item_Type = (Item_Type.InventoryItem).ToString();
+
+                                    NetsuiteInvoiceOptionItem.Quantity = optionitem.quantity;
+                                    NetsuiteInvoiceOptionItem.Amount = (float)optionitem.unit_price;
+
+                                    NetsuiteInvoiceOptionItem.Line_Discount_Amount = 0;
+                                    NetsuiteInvoiceOptionItem.Is_Ingredients_Wasted = prodobj.is_ingredients_wasted; 
+                                    NetsuiteInvoiceOptionItem.ProductStatus = prodobj.status;
+                                    InvoiceItemlst.Add(NetsuiteInvoiceOptionItem);
+                                }
+                            }
+                           
+
+                                //}
+                            }
 
                         //payment methods
                         foreach (var payobj in Foodicsitem.payments)
@@ -234,18 +260,13 @@ namespace FoodicsIntegeration.Tasks
                             paymethod.Payment_Method_Type_Netsuite_Id = 0;
                             PaymentMethodEntitylst.Add(paymethod);
                         }
-                        Invoicelst.Add(Netsuiteitem);
-                     
-                        //new GenericeDAO<Invoice>().InvoiceDetailsUpdateID();
-                        //new GenericeDAO<ItemPrice>().NetSuiteIntegration(NetSuiteItemPricelst);
-                        //return NetSuitelst;
-                        
+                        Invoicelst.Add(Netsuiteitem);                       
                     }
-                }
-                new GenericeDAO<Invoice>().FoodicsIntegration(Invoicelst);
-                new GenericeDAO<Invoice>().InvoiceDetailsDelete(Invoicelst);
-                new GenericeDAO<InvoiceItem>().ListInsertOnly(InvoiceItemlst);
-                new GenericeDAO<PaymentMethodEntity>().ListInsertOnly(PaymentMethodEntitylst);
+                //}
+                //new GenericeDAO<Invoice>().FoodicsIntegration(Invoicelst);
+                //new GenericeDAO<Invoice>().InvoiceDetailsDelete(Invoicelst);
+                //new GenericeDAO<InvoiceItem>().ListInsertOnly(InvoiceItemlst);
+                //new GenericeDAO<PaymentMethodEntity>().ListInsertOnly(PaymentMethodEntitylst);
 
             }
             catch (Exception ex)

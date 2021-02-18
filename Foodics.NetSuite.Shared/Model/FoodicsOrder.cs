@@ -44,6 +44,7 @@ namespace Foodics.NetSuite.Shared.Model
 		public Branch Branch { get; set; }
 		public discount discount { get; set; }
 		public creator creator { get; set; }
+		public List<combos> combos { get; set; }
 
 	}
 
@@ -67,7 +68,32 @@ namespace Foodics.NetSuite.Shared.Model
 		public List<options> options { get; set; }
 
 	}
+	public class combos
+	{
+		public decimal discount_amount { get; set; }
+		public int quantity { get; set; }
+		public int discount_type { get; set; }
+		public List<Products> Products { get; set; }
+		public combo_size combo_size { get; set; }
 
+		
+
+	}
+	public class combo_size
+	{
+		public string id { get; set; }
+		public string name { get; set; }
+		public combo combo { get; set; }
+
+	}
+	public class combo
+	{
+
+		public string id { get; set; }
+		public string name { get; set; }
+		public string sku { get; set; }
+		
+	}
 	public class Product
 	{
 

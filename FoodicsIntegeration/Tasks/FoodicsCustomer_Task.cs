@@ -18,7 +18,8 @@ namespace FoodicsIntegeration.Tasks
     {
         public override void Get(string Subsidiary)
         {
-            object fromDateObj = new GenericeDAO<Customer>().GetLatestModifiedDate("Foodics_UpdateDate");
+            int Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
+            object fromDateObj = new GenericeDAO<Customer>().GetLatestModifiedDate(Subsidiary_Id,"Foodics_UpdateDate");
             DateTime fromDate = new DateTime();
             if (fromDateObj == null)
             {
@@ -72,7 +73,7 @@ namespace FoodicsIntegeration.Tasks
                         {
                             if (item.Value.Count > 0)
                             {
-                              Generate_Save_NetSuiteLst(item.Value, Subsidiary);
+                              Generate_Save_NetSuiteLst(item.Value, Subsidiary_Id);
                             }
                         }
                     }
@@ -81,7 +82,7 @@ namespace FoodicsIntegeration.Tasks
 
         }
 
-        private void Generate_Save_NetSuiteLst(List<FoodicsCustomer> lstitems, string Subsidiary)
+        private void Generate_Save_NetSuiteLst(List<FoodicsCustomer> lstitems, int Subsidiary_Id)
         {
             try
             {
@@ -93,8 +94,9 @@ namespace FoodicsIntegeration.Tasks
 
                     obj.Foodics_Id = Foodicsitem.id;
                     obj.InActive = Foodicsitem.deleted_at != null ? false : true;
+
                     obj.Foodics_UpdateDate = Foodicsitem.updated_at;
-                    obj.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
+                    obj.Subsidiary_Id = Subsidiary_Id;
                     NetSuitelst.Add(obj);
 
                 }

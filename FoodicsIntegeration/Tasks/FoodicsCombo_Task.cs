@@ -33,22 +33,22 @@ namespace FoodicsIntegeration.Tasks
                         //List<Branches> lst = item.Value;
                         if (item.Value.Count > 0)
                         {
-                            object fromDateObj = new GenericeDAO<FoodicsBranche>().GetLatestModifiedDate();
-                            DateTime fromDate = new DateTime();
-                            if (fromDateObj == null)
-                            {
-                                fromDate = DateTime.Now;
-                            }
-                            else
-                            {
-                                fromDate = (DateTime)fromDateObj;
-                                //fromDate = fromDate.AddDays(6);
-                            }
+                            //object fromDateObj = new GenericeDAO<FoodicsBranche>().GetLatestModifiedDate();
+                            //DateTime fromDate = new DateTime();
+                            //if (fromDateObj == null)
+                            //{
+                            //    fromDate = DateTime.Now;
+                            //}
+                            //else
+                            //{
+                            //    fromDate = (DateTime)fromDateObj;
+                            //    //fromDate = fromDate.AddDays(6);
+                            //}
 
-                            // Generate_Save_NetSuiteLst(lstitems.Where(x => x.updated_at >= fromDate).ToList());
+                            //// Generate_Save_NetSuiteLst(lstitems.Where(x => x.updated_at >= fromDate).ToList());
 
 
-                            Generate_Save_NetSuiteLst(item.Value);
+                            //Generate_Save_NetSuiteLst(item.Value);
                         }
                             //new GenericeDAO<FoodicsCombo>().FoodicsIntegration(item.Value);
                           

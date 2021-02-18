@@ -331,6 +331,16 @@ namespace NetSuiteIntegeration.Tasks
             #endregion
             invoiceItemObject.quantitySpecified = true;
             invoiceItemObject.quantity = itemDetails.Quantity;
+            if (!string.IsNullOrEmpty(itemDetails.Combo_Name))
+            {
+                StringCustomFieldRef ComboRef = new StringCustomFieldRef();
+                ComboRef.scriptId = "custcol_da_foodics_combos";
+                ComboRef.value = itemDetails.Combo_Name.ToString() + " - " + itemDetails.ComboSize_Name.ToString();
+
+                CustomFieldRef[] customFieldRefArray = new CustomFieldRef[1];
+                customFieldRefArray[0] = ComboRef;
+                invoiceItemObject.customFieldList = customFieldRefArray;
+            }
             return invoiceItemObject;
         }
 

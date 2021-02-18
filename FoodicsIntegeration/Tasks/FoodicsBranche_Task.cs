@@ -75,7 +75,7 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
                     Netsuiteitem.Name_Ar = Foodicsitem.name_localized + " - " + Foodicsitem.reference + " - " + Subsidiary;
                     Netsuiteitem.Name_En = Foodicsitem.name + " - " + Foodicsitem.reference + " - " + Subsidiary;
-                    Netsuiteitem.InActive = Foodicsitem.deleted_at != null ? false : true;
+                    Netsuiteitem.InActive = Foodicsitem.deleted_at.Year == 1 ? false : true;
 
                     Netsuiteitem.Latitude = Foodicsitem.latitude;
                     Netsuiteitem.Longitude = Foodicsitem.longitude;

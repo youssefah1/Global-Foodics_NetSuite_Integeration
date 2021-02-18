@@ -4,8 +4,8 @@
     <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
   </startup>
   <connectionStrings>
-   <add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Overdoose_Production;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />
-   <!-- <add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Delicious_NetSuite_Integeration;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />-->
+    <!--<add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Foodics_NetSuite_Integeration;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />-->
+   <add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Delicious_NetSuite_Integeration;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />
   </connectionStrings>
   <runtime>
     <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
@@ -60,29 +60,30 @@
     </assemblyBinding>
   </runtime>
   <appSettings>
-
-    <add key="OverdoseFoodics.Token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVkMzkyOGYzODc2ZGEzNjM5OWViMThiMjE0YTdmYzE3ZmI0NmRlZDRmNmRlNTZiNDFkMzdhZDgxOWYxM2FiYWEzYzM1NjU2YmZmNTVkMjQwIn0.eyJhdWQiOiI5MGQ1YTcxOC1lMzBkLTQ5ODYtODY0Ni0wNjdlZDBkMzdkMGUiLCJqdGkiOiJlZDM5MjhmMzg3NmRhMzYzOTllYjE4YjIxNGE3ZmMxN2ZiNDZkZWQ0ZjZkZTU2YjQxZDM3YWQ4MTlmMTNhYmFhM2MzNTY1NmJmZjU1ZDI0MCIsImlhdCI6MTYwOTQyNzYyNCwibmJmIjoxNjA5NDI3NjI0LCJleHAiOjE2NDA5NjM2MjQsInN1YiI6Il8yNzlnOTM5NyIsInNjb3BlcyI6WyJnZW5lcmFsLnJlYWQiLCJvcmRlcnMuZ2lmdF9jYXJkcy5yZWFkIiwib3JkZXJzLmxpc3QiLCJpbnZlbnRvcnkuc2V0dGluZ3MucmVhZCIsImludmVudG9yeS50cmFuc2FjdGlvbnMucmVhZCIsImN1c3RvbWVycy5saXN0IiwibWVudS5pbmdyZWRpZW50cy5yZWFkIl0sImJ1c2luZXNzIjoiOTAzMTMwODYtNDM2OC00M2Q5LTg5NmItNzQ0NTZkMmYyZTBlIiwicmVmZXJlbmNlIjoiNDE2NzIwIn0.k5liV1JM3CGGFFZAyGGjJwBEC3R1hV1qAJDkeTOC-vpLoB4MT9l69QfyludNzaeYolIEEPJEYOyIuNqhfjJjbQAJeXbN8jdIEL8OD_8V2tftjFSJ3P036Ac98T62-pO9rO6fQ-hgxG6q4W9jeCn94As7UVlgYfB1Yb0CQXscj0M7OcxLvc8bydH6CJ8X-nCqfZk-WoJWdRVj7AorvRC6vVcYRmRTMZDZKsO0LGjrxttGl2Fsjs2kbL16U9vAk5IPe7VoeTW9J4CGRImBAX3LG063i8lLuyY5nvrlfPsBjd4b0Q-oRcEIfWikAF2lwuqFZH2KZgQk39x-F1gQeaFt0mtwEDe4EeHoUAXJyNZPCJlrXhABZC_YK_IkF5EDxBRkT9uYU9FEIo2q39p13PlCiZRYvATJR2kJiX8tANrt2kZZWQnqN5V7u9ZwYYqMEgmDlQO9-MBFxv7Ok9liUi_AWSSh-hgtY7sq8yFueQkHsQbfHcPfXN0NKDJMMYgpNaQncZ4UwGe0gY7LOi3a65ZQLFty363K5LNu25G2QNUkMelKQW_zEBBN89wms_lSyYiOp-pT8mrPySyYjrZ7ZIRyH3r0AcbNmlXaRkZ10OLr9Qq1kAwRdeU8gywiSvzd6zuC6Gyh0PRPUUMvM-NzyDuH-HGyXG-ERwdBrIeXSwbBXtk" />
-    <add key="OverdoseFoodics.ResetURL" value="https://api.foodics.com/v5/" />
-    <add key="OverdoseNetsuite.Subsidiary_Id" value="4" />
-
-    <!-- Global Netsuite Keys-->
+    
+    <add key="LavivianeFoodics.Token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImNlMTAzOWE3ZTEzYmEyNWU1N2EwZWQyOWM3YTc3YjZiNjJmYWJjODU3YTZmN2EzNjdkMGIzZTQ1N2JjMGQ5MjBlMWVjNGY4MGM0MjUzNWYyIn0.eyJhdWQiOiI5MWU5NDJiZi0zNWFkLTQ1NTMtYjlkMi1iNjQ0YTQyNWU5YTAiLCJqdGkiOiJjZTEwMzlhN2UxM2JhMjVlNTdhMGVkMjljN2E3N2I2YjYyZmFiYzg1N2E2ZjdhMzY3ZDBiM2U0NTdiYzBkOTIwZTFlYzRmODBjNDI1MzVmMiIsImlhdCI6MTYwNjI5MDkyNywibmJmIjoxNjA2MjkwOTI3LCJleHAiOjE3NjQwNTczMjcsInN1YiI6IjkyMTNmMDQzLTJmMTYtNDZmNS04MTc2LTJlYTMxYjA3OGZiMCIsInNjb3BlcyI6W10sImJ1c2luZXNzIjoiOTIxM2YwNDMtMzUyZi00OGJmLTg5YjEtNTI0NmY2NGQ0Zjk0IiwicmVmZXJlbmNlIjoiOTY3OTMyIn0.p08frs7vSoydVyfDkgkNT7kP9HAmY5Z3tQr56eaT5KRnoZM1qUfTRpP6payLWRAeT17NxAYF5j4AdvfhIZDXfAWidm3z5BKc_BQK8PyJ0Cx-B5Rkn4uMjNmZx4RMI-e9wDRUDv1HYu-6u5l14XYbDtOIo5u9eNqhOuatPpXFFGirkRvriJsaoBlLMZEmdWUiUrUtCkJNGHODDJ_wrCHYTejaPgxyYKDAu_pLElwlRVjQixolShgLSFV2Dobg3-0UxQ29RZZLfCIqQJfAcTJRfqlnADl13qwbSSXu91cA7cK36AcEKR8pvefQYaCTSvP1PIc1GSmpkQB_yIGZNLumuJYC3OjIdfQrNT1fiOdJTjB_3qfCO1s_twVqd70BVa2HpNzSe79me5buqk-be39xJauAyRMydsn50pDniqTHsxczNy7tHL33SVbqMFxhsgAvouztI0VzEJx-crGANmuTG59LQ6yESle52UXxavgUT2Qb_J7sogUkhZpmKaids-mIjkYTCqydUqXuxt_JVW1MECFPO-XeroR6mSbmxSKoXBg6OxvpDZ_q4cVtwFwAMkENIgSCKmghiZITDMOIxhzFMtmHudF-QYmarBHnzVtIChB_m_ep2HwykxsRM4KSZlVSyLzNP8RwWE7CZSc_YOXsuY1vtrt0xmZHahr0DdQgwVg" />
+    <add key="LavivianeFoodics.ResetURL" value="https://api-sandbox.foodics.com/v5/" />
+    <add key="LavivianeNetsuite.Subsidiary_Id" value="3" />
+    
+    <add key="MonroeFoodics.Token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjIyYmJkNDc4ZGUxMjQxMDkyNTNmNzMyNmY2ODgxMTFlMzM2ZjRkNDZlYzhlZTdlOTRmYjhiYWNiZDZiMjk1YmRhMGQ2M2UwM2YwNGIxMmQwIn0.eyJhdWQiOiI5MWU5NDJiZi0zNWFkLTQ1NTMtYjlkMi1iNjQ0YTQyNWU5YTAiLCJqdGkiOiIyMmJiZDQ3OGRlMTI0MTA5MjUzZjczMjZmNjg4MTExZTMzNmY0ZDQ2ZWM4ZWU3ZTk0ZmI4YmFjYmQ2YjI5NWJkYTBkNjNlMDNmMDRiMTJkMCIsImlhdCI6MTYwNDMxMDUxMSwibmJmIjoxNjA0MzEwNTExLCJleHAiOjE3NjIwNzY5MTEsInN1YiI6IjkxZTk0MzAzLTgwMDItNDFjMC05MTI0LWRjNDNjN2YyYmM0YiIsInNjb3BlcyI6W10sImJ1c2luZXNzIjoiOTFlOTQzMDMtODE0MS00Y2NmLTk0NDgtMWM2Mzg2ZTcyMDIwIiwicmVmZXJlbmNlIjoiNTkyNzU0In0.FDgFdEXooiIwFQedr8x0j9u1-u_mQzVzoIy86_dihgq4Gb2D5w3Jac9SSJ3cCAD9YjblNQ0Nnkv8Im7YdAyX78lXCwa1FcqxG1qMHtMiLOj7rtwC2Yg8FDJyuPIjsn4QVyEV_M2JD7M0NSI9dMby5vPkg_GAvMkrPogIezNL70hV_meos9kKa9x6YmaWI0REY1BcFzpRFARyMdgxtIo_D9pfBvmCBcauytO9lEJsQhUSyPiyzijVGJcBSmjiJ-2wcjHqkAPqKEuKJuH3cO6wE0r3WzunMIqH4UAc7rsx_57ZmjIh6obTOtoJ_39FiF8l6gcYZ4Z2iBj2Ek8Tc78sA6GSdeyrY1OSIZuWRnAl0TWjgj_nOlbvWbxW7wyEdrN7MGwDrw0H-jOdsKaSOFrpIGRBL-0Qa6W7QriAGziTNOFMTjMy3D1dY8fSlEB3hCY4U-jq6_43JkvE5XYlzlUffEAFbBrbI-ot_e6eczFqnu6n_Bc74vyf_fB2gV1fQziUSskXSj78Dmt5OXi0yQfx9YUntfc0Novsn5qz0cSahNshPQg7kpcJnnY75aDbhShGYK9piNovNTcqnKgA69FwsI7xlFVv8av_vsysmdeaAmxA78--8S5iD0nO9YvcXA_HXwHfDQbg1q0IT1o3wDQUcziHXRgyP6l2SB_Q0RQRFcU" />
+    <add key="MonroeFoodics.ResetURL" value="https://api-sandbox.foodics.com/v5/" />
+    <add key="MonroeNetsuite.Subsidiary_Id" value="2" />
+      <!--Delicious-->
     <add key="com.netsuite.webservices.netsuite" value="https://webservices.netsuite.com/services/NetSuitePort_2018_1" />
     <add key="promptForLogin" value="false" />
     <add key="login.email" value="yousef.ahmad@digitalarenas.net" />
     <add key="login.password" value="P@ssw0rd123n" />
     <add key="login.roleNSkey" value="1006" />
     <add key="login.useTba" value="true" />
-
-    <!-- Overdoose Production -->
-    <add key="login.acct" value="6249838" />
-    <add key="login.appId" value="EFE4755E-1A8C-460B-B590-B064F5520D8C" />
-    <add key="login.tbaConsumerKey" value="91cddd9e7021572c3ac837e3e0fe1e37a679c9ef70448a3f67ca868823026756" />
-    <add key="login.tbaConsumerSecret" value="7c7b5abe3005b9663b67caa5fc7040075f8b9c394898e6ac701237aa5cca1cf6" />
-    <add key="login.tbaTokenId" value="ab8591780fa9d1e69fe67f9040110880be15634a51fdfba42b85453cd21d31bd" />
-    <add key="login.tbaTokenSecret" value="efab41c5e1c5929945583c10044ceb2b4740950c7808328894cd04094f7fcd97" />
+    <add key="login.acct" value="6411321_SB1" />
+    <add key="login.appId" value="3ED7FEC2-6667-4E8B-B75F-3E904F272D61" />
+    <add key="login.tbaConsumerKey" value="f503d19edfd6f7945ff13ba786656adb6d3c8f5975dc74f4e42189b5906fff20" />
+    <add key="login.tbaConsumerSecret" value="00604f50298be5afc829eb806be886f339c47acb591fae9be0bc332e8cfde0a5" />
+    <add key="login.tbaTokenId" value="02b3045c0983df207f2589c7be9a8c84d7699a61d44bb1bb632fff256f9d6705" />
+    <add key="login.tbaTokenSecret" value="4712f167fc81ee1f23ca32570f96acdbc68a0cf85996e0db750fa1116cbb9e93" />
     <add key="ClientSettingsProvider.ServiceUri" value="" />
-    <add key="TaskRunType" value="3" />
-    <!-- 1 for master Data ,  2 For invoices,   -->
+    <add key="TaskRunType" value="2" /> 
+    <!-- 1 for master Data ,  2 For invoices,3 for all   -->
     
     
   </appSettings>

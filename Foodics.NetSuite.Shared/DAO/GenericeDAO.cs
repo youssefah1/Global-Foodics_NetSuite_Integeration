@@ -44,9 +44,14 @@ namespace Foodics.NetSuite.Shared.DAO
         }
         public T GetByFoodicsId(string Foodics_Id)
         {
+            string tableName = "";
+            if (typeof(T).DeclaringType != null)
+                tableName = typeof(T).DeclaringType.Name;
+            else
+                tableName = typeof(T).Name;
             using (db)
             {
-                string query = "Select * From " + typeof(T).Name + " WHERE Foodics_Id='" + Foodics_Id + "'";
+                string query = "Select * From " + tableName + " WHERE Foodics_Id='" + Foodics_Id + "'";
                 return db.Query<T>(query).FirstOrDefault();
             }
         }
@@ -112,9 +117,14 @@ namespace Foodics.NetSuite.Shared.DAO
         }
         public List<T> GetWhere(string condition)
         {
+            string tableName = "";
+            if (typeof(T).DeclaringType != null)
+                tableName = typeof(T).DeclaringType.Name;
+            else
+                tableName = typeof(T).Name;
             using (db)
             {
-                string query = "Select * From [" + typeof(T).Name + "] WHERE " + condition;
+                string query = "Select * From [" + tableName + "] WHERE " + condition;
                 return db.Query<T>(query).ToList();
             }
         }
@@ -156,13 +166,13 @@ namespace Foodics.NetSuite.Shared.DAO
         //            db.Execute(query.ToString());
         //    }
         //}
-        public void BaseNetSuiteIntegration(List<T> list, string extraFields = "")
+        public void BaseNetSuiteIntegration(List<T> list, string tblName = "")
         {
             string tableName = "";
-            if (string.IsNullOrEmpty(extraFields))
+            if (string.IsNullOrEmpty(tblName))
                 tableName = typeof(T).Name;
             else
-                tableName = extraFields;
+                tableName = tblName;
             StringBuilder query = new StringBuilder();
             for (int i = 0; i < list.Count; i++)
             {
@@ -233,7 +243,12 @@ namespace Foodics.NetSuite.Shared.DAO
 
         public void ItemcompnentFoodicsIntegration(List<T> list, string extraFields = "")
         {
-            string tableName = typeof(T).Name;
+            string tableName = "";
+            if (typeof(T).DeclaringType != null)
+                tableName = typeof(T).DeclaringType.Name;
+            else
+                tableName = typeof(T).Name;
+
             StringBuilder query = new StringBuilder();
             for (int i = 0; i < list.Count; i++)
             {
@@ -306,7 +321,11 @@ namespace Foodics.NetSuite.Shared.DAO
 
         public void UnitmeasureNetSuiteIntegration(List<T> list, string extraFields = "")
         {
-            string tableName = typeof(T).Name;
+            string tableName = "";
+            if (typeof(T).DeclaringType != null)
+                tableName = typeof(T).DeclaringType.Name;
+            else
+                tableName = typeof(T).Name;
             StringBuilder query = new StringBuilder();
             for (int i = 0; i < list.Count; i++)
             {
@@ -341,8 +360,11 @@ namespace Foodics.NetSuite.Shared.DAO
         }
         public void NetSuiteIntegration(List<T> list, string extraFields = "")
         {
-
-            string tableName = typeof(T).Name;
+            string tableName = "";
+            if (typeof(T).DeclaringType != null)
+                tableName = typeof(T).DeclaringType.Name;
+            else
+                tableName = typeof(T).Name;
             StringBuilder query = new StringBuilder();
             for (int i = 0; i < list.Count; i++)
             {
@@ -387,8 +409,11 @@ namespace Foodics.NetSuite.Shared.DAO
 
         public void FoodicsIntegration(List<T> list)
         {
-
-            string tableName = typeof(T).Name;
+            string tableName = "";
+            if (typeof(T).DeclaringType != null)
+                tableName = typeof(T).DeclaringType.Name;
+            else
+                tableName = typeof(T).Name;
             StringBuilder query = new StringBuilder();
             for (int i = 0; i < list.Count; i++)
             {
@@ -788,7 +813,7 @@ namespace Foodics.NetSuite.Shared.DAO
 
 
 
-        public object GetLatestModifiedDate(string Field = "")
+        public object GetLatestModifiedDate(int Subsidiary_Id, string Field = "")
         {
             if (string.IsNullOrEmpty(Field))
                 Field = "UpdateDate";
@@ -796,6 +821,7 @@ namespace Foodics.NetSuite.Shared.DAO
             string tableName = typeof(T).Name;
             StringBuilder query = new StringBuilder();
             query.Append("SELECT MAX(" + Field + ") as TheDate  FROM " + tableName);
+            query.AppendLine(" where Subsidiary_Id =" + Subsidiary_Id);
             object LastDate = new object();
             using (db)
             {

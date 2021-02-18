@@ -28,8 +28,15 @@ namespace Foodics.NetSuite.Shared.Model
         public string Integeration_Error { get; set; }
 
         public string id { get; set; }
+        public category category { get; set; }
 
 
 
     }
-}
+    //public class category
+    //{
+
+    //    public string name { get; set; }
+    //    public string id { get; set; }
+    //}
+    }

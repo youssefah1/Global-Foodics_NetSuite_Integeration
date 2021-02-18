@@ -18,7 +18,8 @@ namespace FoodicsIntegeration.Tasks
     {
         public override void Get(string Subsidiary)
         {
-            string NextPage = ConfigurationManager.AppSettings[Subsidiary+"Foodics.ResetURL"] + "inventory_items";
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary+"Foodics.ResetURL"] + "inventory_items?include=category&filter[updated_after]=2021-01-01";
+            string NextPage = MainURL;
             do
             {
                 var client = new RestClient(NextPage);
@@ -44,6 +45,13 @@ namespace FoodicsIntegeration.Tasks
                         {
                             objLinks = JsonConvert.DeserializeObject<FoodicsLinks>(JsonConvert.SerializeObject(nodes[0]));
                             NextPage = objLinks.next;
+                            if (!string.IsNullOrEmpty(NextPage))
+                            {
+                                int startIndex = NextPage.LastIndexOf("?") + 1;
+                                int endIndex = NextPage.Length - startIndex;
+                                string page = NextPage.Substring(startIndex, endIndex);
+                                NextPage = MainURL + "&" + page;
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -90,12 +98,12 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.storage_to_ingredient_factor = Foodicsitem.storage_to_ingredient_factor;
                     Netsuiteitem.FoodicsUpdateDate = Foodicsitem.updated_at;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
-                    //if (!Netsuiteitem.InActive)
-                    //{
-                    //if (Netsuiteitem.Foodics_Id == "_714323g7")
-                    //{
-                    //    string str = "test";
-                    //}
+                    if (Foodicsitem.category != null && !string.IsNullOrEmpty(Foodicsitem.category.id))
+                    {
+                        Categories.FoodicsCategories obj = new GenericeDAO<Categories.FoodicsCategories>().GetByFoodicsId(Foodicsitem.category.id);
+                        Netsuiteitem.Category_Id = obj.Netsuite_Id;
+                    }
+                   
                     int UnitsOfMeasure_Id = 0;
                         if (!string.IsNullOrEmpty(Netsuiteitem.Ingredient_Unit))
                             UnitsOfMeasure_Id = new CustomDAO().Check_Create_unitName(Netsuiteitem.Ingredient_Unit);
@@ -117,6 +125,7 @@ namespace FoodicsIntegeration.Tasks
                     //}
 
                     Netsuiteitem.Price = Utility.ConvertToDouble(Foodicsitem.cost);
+
 
                     //Inventory NetsuiteInventroy = new Inventory();
                     //NetsuiteInventroy.Foodics_Id = Foodicsitem.id;

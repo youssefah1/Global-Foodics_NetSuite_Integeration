@@ -170,7 +170,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tasks\FoodicsCategories_task.cs" />
+    <Compile Include="Tasks\FoodicsInventoryCategories_task.cs" />
+    <Compile Include="Tasks\FoodicsProductCategories_task.cs" />
     <Compile Include="Tasks\FoodicsCustomer_Task.cs" />
     <Compile Include="Tasks\FoodicsdDiscounts_Task.cs" />
     <Compile Include="Tasks\FoodicsGiftcardtransaction_Task.cs" />

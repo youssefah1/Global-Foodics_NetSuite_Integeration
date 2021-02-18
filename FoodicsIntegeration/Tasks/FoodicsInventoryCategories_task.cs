@@ -13,12 +13,12 @@ using System.Net;
 
 namespace FoodicsIntegeration.Tasks
 {
-    public class FoodicsCategories_task : Foodics_BaseIntegration
+    public class FoodicsInventoryCategories_task : Foodics_BaseIntegration
     {
         public override void Get(string Subsidiary)
         {
 
-            var client = new RestClient(ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "categories");
+            var client = new RestClient(ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "inventory_item_categories");
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", "Bearer " + ConfigurationManager.AppSettings[Subsidiary + "Foodics.Token"]);
@@ -29,14 +29,8 @@ namespace FoodicsIntegeration.Tasks
                 {
                     if (item.Key == "data")
                     {
-                        //List<Branches> lst = item.Value;
                         if (item.Value.Count > 0)
                         {
-                            //new GenericeDAO<FoodicsCategories>().FoodicsIntegration(item.Value);
-
-                            // List<Customer> LstNetSuite = JsonConvert.DeserializeObject<List<Customer>>(JsonConvert.SerializeObject(item.Value));
-                            //new GenericeDAO<Customer>().NetSuiteIntegration(LstNetSuite);
-
                             Generate_Save_NetSuiteLst(item.Value, Subsidiary);
                         }
 
@@ -52,19 +46,20 @@ namespace FoodicsIntegeration.Tasks
         {
             try
             {
-                List<Categories> NetSuitelst = new List<Categories>();
+                List<Categories.FoodicsCategories> NetSuitelst = new List<Categories.FoodicsCategories>();
 
                 foreach (var Foodicsitem in lstitems)
                 {
-                    Categories obj = JsonConvert.DeserializeObject<Categories>(JsonConvert.SerializeObject(Foodicsitem));
+                    Categories.FoodicsCategories obj = JsonConvert.DeserializeObject<Categories.FoodicsCategories>(JsonConvert.SerializeObject(Foodicsitem));
 
                     obj.Foodics_Id = Foodicsitem.id;
-                    obj.InActive = Foodicsitem.deleted_at != null ? false : true;
+                    obj.InActive = Foodicsitem.deleted_at.Year == 1 ? false : true;
                     obj.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
+                    obj.CategoryType =2;
                     NetSuitelst.Add(obj);
 
                 }
-                new GenericeDAO<Categories>().FoodicsIntegration(NetSuitelst);
+                new GenericeDAO<Categories.FoodicsCategories>().FoodicsIntegration(NetSuitelst);
             }
             catch (Exception ex)
             {

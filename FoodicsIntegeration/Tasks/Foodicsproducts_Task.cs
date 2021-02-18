@@ -96,7 +96,7 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.FoodicsUpdateDate = Foodicsitem.updated_at;
                     if (Foodicsitem.category != null && !string.IsNullOrEmpty(Foodicsitem.category.id))
                     {
-                        Categories obj = new GenericeDAO<Categories>().GetByFoodicsId(Foodicsitem.category.id);
+                        Categories.FoodicsCategories obj = new GenericeDAO<Categories.FoodicsCategories>().GetByFoodicsId(Foodicsitem.category.id);
                         Netsuiteitem.Category_Id = obj.Netsuite_Id;
                     }
                     foreach (var ingredientsobj in Foodicsitem.ingredients)

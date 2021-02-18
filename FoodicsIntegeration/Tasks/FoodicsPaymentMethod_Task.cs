@@ -58,7 +58,7 @@ namespace FoodicsIntegeration.Tasks
                 Netsuiteitem.Method_Type_Id = Foodicsitem.type;
                 Netsuiteitem.Name_Ar = Foodicsitem.name_localized;
                 Netsuiteitem.Name_En = Foodicsitem.name;
-                Netsuiteitem.InActive = Foodicsitem.deleted_at != null ? false : true;
+                 Netsuiteitem.InActive = Foodicsitem.deleted_at.Year == 1 ? false : true;
 
                     NetSuitelst.Add(Netsuiteitem);
 

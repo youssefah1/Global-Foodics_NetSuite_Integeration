@@ -41,6 +41,9 @@ namespace Foodics.NetSuite.Shared.Model
         public string Recipient_Email { get; set; }
         public string Gift_Message { get; set; }
         public DateTime Expiration_Date { get; set; }
+        public string Combo_Name { get; set; }
+        public string ComboSize_Name { get; set; }
+
 
     }
 }

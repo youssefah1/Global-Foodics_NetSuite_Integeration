@@ -30,7 +30,8 @@ namespace NetSuiteIntegeration.Tasks
                 //}
                 //fromDate = fromDate.AddDays(-2);
 
-                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere("  (Netsuite_Id IS NULL or Netsuite_Id =0) and (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
+                //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere("  (Netsuite_Id IS NULL or Netsuite_Id =0) and (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
+                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" Netsuite_Id in(3218,3219)  and(Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
 
                 List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
                 List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
@@ -53,9 +54,9 @@ namespace NetSuiteIntegeration.Tasks
                 // Send order list to netsuite
                 if (Lst_ItemsUpdate.Count > 0)
                 {
-                  //  com.netsuite.webservices.AssemblyItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
+                    com.netsuite.webservices.AssemblyItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
 
-                  //  WriteResponseList wr = Service(true).updateList(ItemArrAdd);
+                    WriteResponseList wr = Service(true).updateList(ItemArrAdd);
                 //    bool result = wr.status.isSuccess;
 
                 }
@@ -81,15 +82,23 @@ namespace NetSuiteIntegeration.Tasks
                     Item Obj = Lst_Items[i];
                     Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj.Subsidiary_Id).FirstOrDefault();
                     com.netsuite.webservices.AssemblyItem NewItemObject = new com.netsuite.webservices.AssemblyItem();
-                    
-                    NewItemObject.displayName = Obj.Display_Name_En;
-                    //NewItemObject.itemId = Obj.UPC_Code;
-                    NewItemObject.itemId = Obj.Display_Name_En;
-                    
+                    Categories.CategoriesAccounts objCatAccount = new Categories.CategoriesAccounts();
+
+                    if (Obj.Netsuite_Id < 0)
+                    {
+                        NewItemObject.displayName = Obj.Display_Name_En;
+                        //NewItemObject.itemId = Obj.UPC_Code;
+                        NewItemObject.itemId = Obj.Display_Name_En;
+                    }
                     RecordRef classref = new RecordRef();
                     classref.internalId = Obj.Category_Id.ToString();
                     classref.type = RecordType.classification;
                     NewItemObject.@class = classref;
+
+                    if (Obj.Category_Id > 0)
+                    {
+                        objCatAccount = new GenericeDAO<Categories.CategoriesAccounts>().GetWhere("Netsuite_Id=" + Obj.Category_Id).FirstOrDefault();
+                    }
 
                     #region Custom fields
 
@@ -138,30 +147,85 @@ namespace NetSuiteIntegeration.Tasks
                         }
                         memberlst.itemMember = ItemMemberlst;
                         NewItemObject.memberList = memberlst;
-                        NewItemObject.memberList.replaceAll = false;
+                        NewItemObject.memberList.replaceAll = true;
                     }
+
+
+
+                    #endregion
+                    #region Items Account
+                    RecordRef IncomAccountref = new RecordRef();
+                    IncomAccountref.type = RecordType.account;
+                    NewItemObject.incomeAccount = IncomAccountref;
+                    if (objCatAccount.income_account > 0)
+                        IncomAccountref.internalId = objCatAccount.income_account.ToString();
                     else
+                        IncomAccountref.internalId = objSetting.IncomeAccount_Netsuite_Id.ToString();
+
+                    RecordRef cogsAccountref = new RecordRef();
+                    cogsAccountref.type = RecordType.account;
+                    NewItemObject.cogsAccount = cogsAccountref;
+                    if (objCatAccount.cogs_account > 0)
+                        cogsAccountref.internalId = objCatAccount.cogs_account.ToString();
+                    else
+                        cogsAccountref.internalId = objSetting.CogsAccount_Netsuite_Id.ToString();
+
+                    RecordRef assetAccountref = new RecordRef();
+                    assetAccountref.type = RecordType.account;
+                    NewItemObject.assetAccount = assetAccountref;
+                    if (objCatAccount.asset_account > 0)
+                        assetAccountref.internalId = objCatAccount.asset_account.ToString();
+                    else
+                        assetAccountref.internalId = objSetting.AssetAccount_Netsuite_Id.ToString();
+
+                    RecordRef intercoIncomeref = new RecordRef();
+                    intercoIncomeref.type = RecordType.account;
+                    NewItemObject.intercoIncomeAccount = intercoIncomeref;
+                    if (objCatAccount.income_intercompany_account > 0)
+                        intercoIncomeref.internalId = objCatAccount.income_intercompany_account.ToString();
+                    else
+                        intercoIncomeref.internalId = objSetting.IntercoIncomeAccount_Netsuite_Id.ToString();
+
+                    RecordRef intercoCogsAccount = new RecordRef();
+                    intercoCogsAccount.type = RecordType.account;
+                    NewItemObject.intercoCogsAccount = intercoCogsAccount;
+                    if (objCatAccount.inter_cogs_account > 0)
+                        intercoCogsAccount.internalId = objCatAccount.inter_cogs_account.ToString();
+                    else
+                        intercoCogsAccount.internalId = objSetting.IntercoCogsAccount_Netsuite_Id.ToString();
+
+                    RecordRef gainLossAccount = new RecordRef();
+                    gainLossAccount.type = RecordType.account;
+                    NewItemObject.gainLossAccount = gainLossAccount;
+                    if (objCatAccount.gainloss_account > 0)
+                        gainLossAccount.internalId = objCatAccount.gainloss_account.ToString();
+                    else
+                        gainLossAccount.internalId = objSetting.GainLossAccount_Netsuite_Id.ToString();
+
+                    
+                    if (objCatAccount.cust_qty_variance_account > 0)
                     {
-                        //ItemMember[] ItemMemberlst = new ItemMember[1];
-                        //ItemMemberList memberlst = new ItemMemberList();
-
-                        //ItemMember obj = new ItemMember();
-
-                        //RecordRef Itemref = new RecordRef();
-                        //Itemref.internalId = objSetting.Item_Tmp_Netsuite_Id.ToString();
-                        //Itemref.type = RecordType.inventoryItem;
-
-                        //obj.item = Itemref;
-                        //obj.quantity = 10;
-
-                        //ItemMemberlst[0] = obj;
-
-
-                        //memberlst.itemMember = ItemMemberlst;
-                        //NewItemObject.memberList = memberlst;
+                        RecordRef refgAccount = new RecordRef();
+                        refgAccount.type = RecordType.account;
+                        refgAccount.internalId = objCatAccount.cust_qty_variance_account.ToString();
+                        NewItemObject.billQtyVarianceAcct = refgAccount;
                     }
 
-
+                    if (objCatAccount.cust_ex_rate_account > 0)
+                    {
+                        RecordRef refgAccount = new RecordRef();
+                        refgAccount.type = RecordType.account;
+                        refgAccount.internalId = objCatAccount.cust_ex_rate_account.ToString();
+                        NewItemObject.billExchRateVarianceAcct = refgAccount;
+                    }
+                    if (objCatAccount.price_variance_account > 0)
+                    {
+                        RecordRef refgAccount = new RecordRef();
+                        refgAccount.type = RecordType.account;
+                        refgAccount.internalId = objCatAccount.price_variance_account.ToString();
+                        NewItemObject.billPriceVarianceAcct = refgAccount;
+                    }
+                    
                     #endregion
                     RecordRef Tax_Schedule = new RecordRef();
                     Tax_Schedule.internalId = objSetting.TaxSchedule_Netsuite_Id.ToString();

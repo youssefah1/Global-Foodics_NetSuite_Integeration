@@ -15,51 +15,39 @@ namespace NetSuiteIntegeration.Tasks
     {
         public override Int64 Set(string parametersArr)
         {
-            //for (int i = 0; i < 20; i++)
-            //{
+           
 
-            //    int start = i * 100;
-            //    int end = 100 * (i + 1);
-                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
-              //  List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id between " + start + " and " + end + " and Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
+                
+                //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
+                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id >=1200 and inactive=0 and Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
+            //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id=1085 and Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
 
-                List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
-                List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
+            List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
+            List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
 
-                if (Lst_ItemsAll.Count <= 0)
-                    return 0;
+            if (Lst_ItemsAll.Count <= 0)
+                return 0;
 
+            // Send order list to netsuite
+            if (Lst_ItemsNew.Count > 0)
+            {
+                com.netsuite.webservices.InventoryItem[] ItemArrNew = GenerateNetSuitelst(Lst_ItemsNew);
+                WriteResponseList wrNew = Service(true).addList(ItemArrNew);
+                bool result = wrNew.status.isSuccess;
+                if (result)
+                {
+                    //Update database with returned Netsuite ids
+                    UpdatedLst(Lst_ItemsNew, wrNew);
+                }
+            }
+
+            if (Lst_ItemsUpdate.Count > 0)
+            {
+                com.netsuite.webservices.InventoryItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
                 // Send order list to netsuite
-                if (Lst_ItemsNew.Count > 0)
-                {
-                    com.netsuite.webservices.InventoryItem[] ItemArrNew = GenerateNetSuitelst(Lst_ItemsNew);
-                    WriteResponseList wrNew = Service(true).addList(ItemArrNew);
-                    bool result = wrNew.status.isSuccess;
-                    if (result)
-                    {
-                        //Update database with returned Netsuite ids
-                        UpdatedLst(Lst_ItemsNew, wrNew);
-                    }
-                }
+                WriteResponseList wr = Service(true).updateList(ItemArrAdd);
+            }
 
-                if (Lst_ItemsUpdate.Count > 0)
-                {
-                    com.netsuite.webservices.InventoryItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
-                    // Send order list to netsuite
-                    WriteResponseList wr = Service(true).updateList(ItemArrAdd);
-                }
-
-
-
-
-
-                //bool result = wr.status.isSuccess;
-                //if (result)
-                //{
-                //    //Update database with returned Netsuite ids
-                //    UpdatedLst(Lst_ItemsNew, wr);
-                //}
-           // }
             return 0;
         }
         public com.netsuite.webservices.InventoryItem[] GenerateNetSuitelst(List<Item> Lst_ItemsAll)
@@ -72,18 +60,28 @@ namespace NetSuiteIntegeration.Tasks
                     RecordRef[] subsidiarylst = new RecordRef[1];
                     Item Obj = Lst_ItemsAll[i];
                     Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj.Subsidiary_Id).FirstOrDefault();
+                    Categories.CategoriesAccounts objCatAccount = new Categories.CategoriesAccounts();
                     com.netsuite.webservices.InventoryItem NewItemObject = new com.netsuite.webservices.InventoryItem();
-                    NewItemObject.displayName = Obj.Display_Name_En;
-                    //NewItemObject.itemId = Obj.UPC_Code;
-                    NewItemObject.itemId = Obj.Display_Name_En;
-                    NewItemObject.salesDescription = Obj.Display_Name_En;
-
+                    if (Obj.Netsuite_Id <= 0)
+                    {
+                        NewItemObject.displayName = Obj.Display_Name_En;
+                        //NewItemObject.itemId = Obj.UPC_Code;
+                        NewItemObject.itemId = Obj.Display_Name_En;
+                        NewItemObject.salesDescription = Obj.Display_Name_En;
+                    }
                     //check if new or can be updated
                     if (Obj.Netsuite_Id > 0)
                         NewItemObject.internalId = Obj.Netsuite_Id.ToString();
 
                     NewItemObject.pricingMatrix = Helper.GeneratePricingMatrix(objSetting, Obj.Price);
-
+                    if (Obj.Category_Id > 0)
+                    {
+                        objCatAccount = new GenericeDAO<Categories.CategoriesAccounts>().GetWhere("Netsuite_Id=" + Obj.Category_Id).FirstOrDefault();
+                        RecordRef classref = new RecordRef();
+                        classref.internalId = Obj.Category_Id.ToString();
+                        classref.type = RecordType.classification;
+                        NewItemObject.@class = classref;
+                    }
                     CustomFieldRef[] custFieldList = new CustomFieldRef[] {
 
                         new StringCustomFieldRef {
@@ -120,10 +118,9 @@ namespace NetSuiteIntegeration.Tasks
                         List<UnitsOfMeasure> unitlst = new GenericeDAO<UnitsOfMeasure>().GetWhere("unitName ='" + Obj.Storage_Unit + "' and abbreviation ='" + Obj.Storage_Unit + "' and conversionRate ='" + Obj.storage_to_ingredient_factor + "'");
                         if (unitlst.Count > 0)
                             objunit = unitlst[0];
-                        
+
                     }
 
-                    //unit of measure
                     if (objunit != null && objunit.Id > 0)
                     {
                         RecordRef unitsTyperef = new RecordRef();
@@ -139,32 +136,88 @@ namespace NetSuiteIntegeration.Tasks
 
                     }
 
+
+                    #region Items Account
+                    RecordRef IncomAccountref = new RecordRef();
+                    IncomAccountref.type = RecordType.account;
+                    NewItemObject.incomeAccount = IncomAccountref;
+                    if (objCatAccount.income_account > 0)
+                        IncomAccountref.internalId = objCatAccount.income_account.ToString();
+                    else
+                        IncomAccountref.internalId = objSetting.IncomeAccount_Netsuite_Id.ToString();
+
                     RecordRef cogsAccountref = new RecordRef();
-                    cogsAccountref.internalId = objSetting.CogsAccount_Netsuite_Id.ToString();
                     cogsAccountref.type = RecordType.account;
                     NewItemObject.cogsAccount = cogsAccountref;
+                    if (objCatAccount.cogs_account > 0)
+                        cogsAccountref.internalId = objCatAccount.cogs_account.ToString();
+                    else
+                        cogsAccountref.internalId = objSetting.CogsAccount_Netsuite_Id.ToString();
 
                     RecordRef assetAccountref = new RecordRef();
-                    assetAccountref.internalId = objSetting.AssetAccount_Netsuite_Id.ToString();
                     assetAccountref.type = RecordType.account;
                     NewItemObject.assetAccount = assetAccountref;
+                    if (objCatAccount.asset_account > 0)
+                        assetAccountref.internalId = objCatAccount.asset_account.ToString();
+                    else
+                        assetAccountref.internalId = objSetting.AssetAccount_Netsuite_Id.ToString();
 
                     RecordRef intercoIncomeref = new RecordRef();
-                    intercoIncomeref.internalId = objSetting.IntercoIncomeAccount_Netsuite_Id.ToString();
                     intercoIncomeref.type = RecordType.account;
                     NewItemObject.intercoIncomeAccount = intercoIncomeref;
+                    if (objCatAccount.income_intercompany_account > 0)
+                        intercoIncomeref.internalId = objCatAccount.income_intercompany_account.ToString();
+                    else
+                        intercoIncomeref.internalId = objSetting.IntercoIncomeAccount_Netsuite_Id.ToString();
 
                     RecordRef intercoCogsAccount = new RecordRef();
-                    intercoCogsAccount.internalId = objSetting.IntercoCogsAccount_Netsuite_Id.ToString();
                     intercoCogsAccount.type = RecordType.account;
                     NewItemObject.intercoCogsAccount = intercoCogsAccount;
+                    if (objCatAccount.inter_cogs_account > 0)
+                        intercoCogsAccount.internalId = objCatAccount.inter_cogs_account.ToString();
+                    else
+                        intercoCogsAccount.internalId = objSetting.IntercoCogsAccount_Netsuite_Id.ToString();
 
                     RecordRef gainLossAccount = new RecordRef();
-                    gainLossAccount.internalId = objSetting.GainLossAccount_Netsuite_Id.ToString();
                     gainLossAccount.type = RecordType.account;
                     NewItemObject.gainLossAccount = gainLossAccount;
+                    if (objCatAccount.gainloss_account > 0)
+                        gainLossAccount.internalId = objCatAccount.gainloss_account.ToString();
+                    else
+                        gainLossAccount.internalId = objSetting.GainLossAccount_Netsuite_Id.ToString();
 
+                    //if (objCatAccount.price_variance_account > 0)//You do not have permissions to set a value for element purchasepricevarianceacct 
+                    //{
+                    //    RecordRef PriceAccount = new RecordRef();
+                    //    PriceAccount.type = RecordType.account;
+                    //    PriceAccount.internalId = objCatAccount.price_variance_account.ToString();
+                    //    NewItemObject.purchasePriceVarianceAcct = PriceAccount;
+                    //}
 
+                    if (objCatAccount.cust_qty_variance_account > 0)
+                    {
+                        RecordRef refgAccount = new RecordRef();
+                        refgAccount.type = RecordType.account;
+                        refgAccount.internalId = objCatAccount.cust_qty_variance_account.ToString();
+                        NewItemObject.billQtyVarianceAcct = refgAccount;
+                    }
+
+                    if (objCatAccount.cust_ex_rate_account > 0)
+                    {
+                        RecordRef refgAccount = new RecordRef();
+                        refgAccount.type = RecordType.account;
+                        refgAccount.internalId = objCatAccount.cust_ex_rate_account.ToString();
+                        NewItemObject.billExchRateVarianceAcct = refgAccount;
+                    }
+                    if (objCatAccount.price_variance_account > 0)
+                    {
+                        RecordRef refgAccount = new RecordRef();
+                        refgAccount.type = RecordType.account;
+                        refgAccount.internalId = objCatAccount.price_variance_account.ToString();
+                        NewItemObject.billPriceVarianceAcct = refgAccount;
+                    }
+                  
+                    #endregion
                     RecordRef Tax_Schedule = new RecordRef();
                     Tax_Schedule.internalId = objSetting.TaxSchedule_Netsuite_Id.ToString();
                     Tax_Schedule.type = RecordType.salesTaxItem;

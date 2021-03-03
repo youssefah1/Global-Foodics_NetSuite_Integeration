@@ -15,6 +15,7 @@ namespace Foodics.NetSuite.Shared
         AssemblyItem = 2, //Product
         GiftCertificate= 3,//Gift 
         Combo = 4,//Combo
+        ServiceSaleItem = 5
 
     }
     public enum LogIntegrationType

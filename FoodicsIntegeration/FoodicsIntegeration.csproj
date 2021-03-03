@@ -179,6 +179,7 @@
     <Compile Include="Tasks\FoodicsPaymentMethod_Task.cs" />
     <Compile Include="Tasks\FoodicsCombo_Task.cs" />
     <Compile Include="Tasks\FoodicsGiftCardProduct_Task.cs" />
+    <Compile Include="Tasks\FoodicsModifierOptions_Task.cs" />
     <Compile Include="Tasks\Foodicsproducts_Task.cs" />
     <Compile Include="Tasks\FoodicsInventoryItem_Task.cs" />
     <Compile Include="Tasks\FoodicsBranche_Task.cs" />

@@ -17,7 +17,7 @@ namespace NetSuiteIntegeration.Tasks
         {
             try
             {
-                new CustomDAO().UpdateProductCompnent();
+
                 //object fromDateObj = new GenericeDAO<Item>().GetLatestModifiedDate();
                 //DateTime fromDate = new DateTime();
                 //if (fromDateObj == null)
@@ -30,8 +30,8 @@ namespace NetSuiteIntegeration.Tasks
                 //}
                 //fromDate = fromDate.AddDays(-2);
 
-                //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere("  (Netsuite_Id IS NULL or Netsuite_Id =0) and (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
-                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" Netsuite_Id in(3218,3219)  and(Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
+                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere("  (Netsuite_Id IS NULL or Netsuite_Id =0) and inactive=0 and  (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
+                //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id >= 1238  and inactive=0 and  (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
 
                 List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
                 List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
@@ -60,6 +60,8 @@ namespace NetSuiteIntegeration.Tasks
                 //    bool result = wr.status.isSuccess;
 
                 }
+                new CustomDAO().UpdateProductCompnent();
+
             }
             catch (Exception ex)
             {
@@ -84,7 +86,7 @@ namespace NetSuiteIntegeration.Tasks
                     com.netsuite.webservices.AssemblyItem NewItemObject = new com.netsuite.webservices.AssemblyItem();
                     Categories.CategoriesAccounts objCatAccount = new Categories.CategoriesAccounts();
 
-                    if (Obj.Netsuite_Id < 0)
+                    if (Obj.Netsuite_Id <= 0)
                     {
                         NewItemObject.displayName = Obj.Display_Name_En;
                         //NewItemObject.itemId = Obj.UPC_Code;
@@ -94,6 +96,9 @@ namespace NetSuiteIntegeration.Tasks
                     classref.internalId = Obj.Category_Id.ToString();
                     classref.type = RecordType.classification;
                     NewItemObject.@class = classref;
+
+                    NewItemObject.trackLandedCost = true;
+                    NewItemObject.trackLandedCostSpecified = true;
 
                     if (Obj.Category_Id > 0)
                     {

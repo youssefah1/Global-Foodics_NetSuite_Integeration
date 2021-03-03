@@ -61,6 +61,8 @@ namespace NetSuiteIntegeration.Tasks
                             Mainitem.type = RecordType.assemblyItem;
                             AssemblyBuildObject.item = Mainitem;
 
+                            AssemblyBuildObject.tranDateSpecified = true;
+                            AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 02, 14), TimeZoneInfo.Local);
 
                             location = new RecordRef();
                             location.internalId = Obj_info.Location_Id.ToString(); //objSetting.Location_Netsuite_Id.ToString();

@@ -52,6 +52,7 @@
     <Compile Include="Tasks\CustomerRefundTask.cs" />
     <Compile Include="Tasks\DiscountTask.cs" />
     <Compile Include="Tasks\InvoiceReturnTask.cs" />
+    <Compile Include="Tasks\ServiceItemTask.cs" />
     <Compile Include="Tasks\SettingTask.cs" />
     <Compile Include="Tasks\PaymentMethodTask.cs" />
     <Compile Include="Tasks\ProductClassTask.cs" />

@@ -27,8 +27,14 @@ namespace NetSuiteIntegeration.Tasks
         {
             try
             {
+                #region Check Correct Invoices
+                //                SELECT*
+                //FROM            Invoice
+                //WHERE(Location_Id = 207)
+                //and Order_Status = 4
+                //and Net_Payable + Total_Discount != (select sum(Quantity * amount) - sum(Line_Discount_Amount) from InvoiceItem where InvoiceItem.Invoice_Id = Invoice.Id and ProductStatus = 3 )
+                #endregion
 
-                new CustomDAO().UpdateInvoiceItem();
 
                 List<Foodics.NetSuite.Shared.Model.Invoice> invoiceLst = new CustomDAO().SelectInvoice(4);
                 bool result = true;
@@ -63,9 +69,7 @@ namespace NetSuiteIntegeration.Tasks
                             invoice_info = invoiceLst[i];
                             Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + invoice_info.Subsidiary_Id).FirstOrDefault();
                             invoiceObject = new Invoice();
-                            //invoiceObject.customForm = myCustomForm;
-                            //get invoice items
-
+                           
                             #region invoice items
                             itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere(" ProductStatus =3 and Invoice_Id =" + invoice_info.Id + " and isnull(Item_Id,0) >0 ");//Completed order
                                                                                                                                                                                                    //if (itemLst.Count > 0)
@@ -87,8 +91,6 @@ namespace NetSuiteIntegeration.Tasks
                                     if (itemDetails.Line_Discount_Amount > 0)
                                     {
                                         float Discount = itemDetails.Line_Discount_Amount;
-                                        //if (itemDetails.Line_Discount_Amount != itemDetails.Amount)
-                                        //    Discount = itemDetails.Amount;
                                         k++;
                                         Foodics.NetSuite.Shared.Model.InvoiceItem OtherCharge = new Foodics.NetSuite.Shared.Model.InvoiceItem();
                                         OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id; //1211;

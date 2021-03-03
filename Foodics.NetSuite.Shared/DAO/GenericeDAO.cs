@@ -430,9 +430,9 @@ namespace Foodics.NetSuite.Shared.DAO
 
                     query.Append("IF EXISTS(SELECT Foodics_Id FROM [" + tableName + "] WHERE Foodics_Id = '" + Foodics_ID + "'");
                     if (Subsidiary_Id > 0)
-                        query.Append(" and Subsidiary_Id='" + Subsidiary_Id);
+                        query.Append(" and Subsidiary_Id='" + Subsidiary_Id + "'");
 
-                    query.Append("')");
+                    query.Append(")");
                     query.Append("  BEGIN UPDATE [" + tableName + "] SET ");
                     foreach (var pro in proList)
                     {
@@ -752,6 +752,21 @@ namespace Foodics.NetSuite.Shared.DAO
                     query.Append(@"UPDATE [" + tableName + "] SET Netsuite_Id=" + iDs[i].Item1 + "  Where (Netsuite_Id =0 or Netsuite_Id IS NULL) AND id='" + iDs[i].Item2 + "' ");
                 }
             }
+            using (db)
+            {
+                if (!string.IsNullOrEmpty(query.ToString()))
+                    db.Execute(query.ToString());
+            }
+        }
+        public void UpdateNetsuiteID_ADjustement(List<Tuple<int, int,int>> iDs, string tableName, string PK = "", bool workOrder = false, bool itemFulfillment = false)
+        {
+            StringBuilder query = new StringBuilder();
+
+           
+                for (int i = 0; i < iDs.Count; i++)
+                {
+                    query.Append(@"UPDATE [" + tableName + "] SET Netsuite_Id=" + iDs[i].Item1 + "  Where (Netsuite_Id =0 or Netsuite_Id IS NULL) AND Location_Id='" + iDs[i].Item2 + "' AND Subsidiary_Id = '" + iDs[i].Item3 + "' ");
+                }
             using (db)
             {
                 if (!string.IsNullOrEmpty(query.ToString()))

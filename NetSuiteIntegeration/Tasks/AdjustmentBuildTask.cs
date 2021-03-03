@@ -36,92 +36,93 @@ namespace NetSuiteIntegeration.Tasks
             try
             {
                 new CustomDAO().GenerateAdjustmentBuild();
-                List<Foodics.NetSuite.Shared.Model.AdjustmentBuild> ColLst = new CustomDAO().SelectAdjustmentLocation();
-                bool result = true;
-                if (ColLst.Count > 0)
+                List<Foodics.NetSuite.Shared.Model.AdjustmentBuild> ColLstAll = new CustomDAO().SelectAdjustmentLocation();
+                var ColLst =
+                ColLstAll.DistinctBy(x=> new { x.Location_Id, x.Netsuite_Id }).Select(x => new AdjustmentBuild
                 {
-                    com.netsuite.webservices.InventoryAdjustment[] AdjustArr = new com.netsuite.webservices.InventoryAdjustment[ColLst.Count];
-                    for (int i = 0; i < ColLst.Count; i++)
+                    Location_Id = x.Location_Id,
+                    Subsidiary_Id = x.Subsidiary_Id,
+                }).Distinct().ToList();
+                if (ColLst.Count <= 0)
+                    return 0;
+
+                com.netsuite.webservices.InventoryAdjustment[] AdjustArr = new com.netsuite.webservices.InventoryAdjustment[ColLst.Count];
+                for (int i = 0; i < ColLst.Count; i++)
+                {
+                    com.netsuite.webservices.InventoryAdjustment AdjustBuildObject;
+                    Foodics.NetSuite.Shared.Model.AdjustmentBuild Obj_info;
+                    try
                     {
-                        com.netsuite.webservices.InventoryAdjustment AdjustBuildObject;
-                        Foodics.NetSuite.Shared.Model.AdjustmentBuild Obj_info;
-                        try
+                        Obj_info = ColLst[i];
+                        //Netsuite invoice type
+                        AdjustBuildObject = new com.netsuite.webservices.InventoryAdjustment();
+                        Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj_info.Subsidiary_Id).FirstOrDefault();
+
+                        AdjustBuildObject.tranDateSpecified = true;
+                        //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
+                        AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 02, 14), TimeZoneInfo.Local);
+
+                        // adjustment account
+                        RecordRef adjustment_account = new RecordRef();
+                        adjustment_account.type = RecordType.account;
+                        adjustment_account.typeSpecified = true;
+                        adjustment_account.internalId = objSetting.AdjustmentAccount_Netsuite_Id.ToString();//"122";
+                        AdjustBuildObject.account = adjustment_account;
+
+                        // adjustment location
+                        RecordRef adjustment_location = new RecordRef();
+                        adjustment_location.type = RecordType.location;
+                        adjustment_location.typeSpecified = true;
+                        adjustment_location.internalId = Obj_info.Location_Id.ToString();
+                        AdjustBuildObject.location = adjustment_location;
+                        AdjustBuildObject.adjLocation = adjustment_location;
+
+                        // subsidiary
+                        RecordRef adjustment_subsidiary = new RecordRef();
+                        adjustment_subsidiary.type = RecordType.subsidiary;
+                        adjustment_subsidiary.typeSpecified = true;
+                        adjustment_subsidiary.internalId = Obj_info.Subsidiary_Id.ToString();
+                        AdjustBuildObject.subsidiary = adjustment_subsidiary;
+
+                        List<Foodics.NetSuite.Shared.Model.AdjustmentBuild> adjustment_items = ColLstAll.Where(x => x.Subsidiary_Id == Obj_info.Subsidiary_Id && x.Location_Id == Obj_info.Location_Id).ToList();
+                        InventoryAdjustmentInventory[] invadjustmentItemArray = new InventoryAdjustmentInventory[adjustment_items.Count()];
+                        for (int x = 0; x < adjustment_items.Count(); x++)
                         {
-                            Obj_info = ColLst[i];
-                            //Netsuite invoice type
-                            AdjustBuildObject = new com.netsuite.webservices.InventoryAdjustment();
-                            Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj_info.Subsidiary_Id).FirstOrDefault();
+                            RecordRef item = new RecordRef();
+                            item.internalId = adjustment_items[x].Item_Id.ToString();
 
-                            AdjustBuildObject.tranDateSpecified = true;
-                            //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
-                            AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021,01,07), TimeZoneInfo.Local);
-
-                            // adjustment account
-                            RecordRef adjustment_account = new RecordRef();
-                            adjustment_account.type = RecordType.account;
-                            adjustment_account.typeSpecified = true;
-                            adjustment_account.internalId = objSetting.AdjustmentAccount_Netsuite_Id.ToString();//"122";
-                            AdjustBuildObject.account = adjustment_account;
-
-                            // adjustment location
-                            RecordRef adjustment_location = new RecordRef();
-                            adjustment_location.type = RecordType.location;
-                            adjustment_location.typeSpecified = true;
-                            adjustment_location.internalId = Obj_info.Location_Id.ToString();
-                            AdjustBuildObject.location = adjustment_location;
-                            AdjustBuildObject.adjLocation = adjustment_location;
-
-                            // subsidiary
-                            RecordRef adjustment_subsidiary = new RecordRef();
-                            adjustment_subsidiary.type = RecordType.subsidiary;
-                            adjustment_subsidiary.typeSpecified = true;
-                            adjustment_subsidiary.internalId = Obj_info.Subsidiary_Id.ToString();
-                            AdjustBuildObject.subsidiary = adjustment_subsidiary;
-                            
-                            List<Foodics.NetSuite.Shared.Model.AdjustmentBuild> adjustment_items = new GenericeDAO<Foodics.NetSuite.Shared.Model.AdjustmentBuild>().GetWhere("Location_Id =" + Obj_info.Location_Id+ " and (Netsuite_Id IS NULL or Netsuite_Id =0)").Take(200).ToList();
-                            InventoryAdjustmentInventory[] invadjustmentItemArray = new InventoryAdjustmentInventory[adjustment_items.Count()];
-                            for (int x = 0; x < adjustment_items.Count(); x++)
-                            {
-                                RecordRef item = new RecordRef();
-                                item.internalId = adjustment_items[x].Item_Id.ToString();
-
-                                invadjustmentItemArray[x] = new InventoryAdjustmentInventory();
-                                invadjustmentItemArray[x].item = item;
-                                invadjustmentItemArray[x].location = adjustment_location;
-                                invadjustmentItemArray[x].adjustQtyBy = (adjustment_items[x].Quantity * -1);
-                                invadjustmentItemArray[x].adjustQtyBySpecified = true;
-
-                                
-                            }
-
-                            InventoryAdjustmentInventoryList invList = new InventoryAdjustmentInventoryList();
-                            invList.inventory = invadjustmentItemArray;
-                            AdjustBuildObject.inventoryList = invList;
+                            invadjustmentItemArray[x] = new InventoryAdjustmentInventory();
+                            invadjustmentItemArray[x].item = item;
+                            invadjustmentItemArray[x].location = adjustment_location;
+                            invadjustmentItemArray[x].adjustQtyBy = (adjustment_items[x].Quantity * -1);
+                            invadjustmentItemArray[x].adjustQtyBySpecified = true;
 
 
-
-                            AdjustArr[i] = AdjustBuildObject;
                         }
-                        catch (Exception ex)
-                        {
-                            ColLst.RemoveAt(i);
-                            LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
-                        }
+
+                        InventoryAdjustmentInventoryList invList = new InventoryAdjustmentInventoryList();
+                        invList.inventory = invadjustmentItemArray;
+                        AdjustBuildObject.inventoryList = invList;
+
+
+
+                        AdjustArr[i] = AdjustBuildObject;
                     }
-                    // Send invoice list to netsuite
-                    WriteResponseList wr = Service(true).addList(AdjustArr);
-                    result = wr.status.isSuccess;
-                    if (result)
+                    catch (Exception ex)
                     {
-                        //Update database with returned Netsuite ids
-                        Updatedlst(ColLst, wr);
-
+                        ColLst.RemoveAt(i);
+                        LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
                     }
-
                 }
 
-                // post customerPayment to netsuite
-                //  bool postPayments = PostCustomerPayment();
+                WriteResponseList wr = Service(true).addList(AdjustArr);
+                bool result = wr.status.isSuccess;
+                if (result)
+                {
+                    //Update database with returned Netsuite ids
+                    Updatedlst(ColLst, wr);
+
+                }
             }
             catch (Exception ex)
             {
@@ -138,7 +139,7 @@ namespace NetSuiteIntegeration.Tasks
             try
             {
                 //Tuple to hold local invoice ids and its corresponding Netsuite ids
-                List<Tuple<int, string>> iDs = new List<Tuple<int, string>>();
+                List<Tuple<int, int, int>> iDs = new List<Tuple<int, int, int>>();
                 //loop to fill tuple values
                 for (int counter = 0; counter < InvoiceLst.Count; counter++)
                 {
@@ -151,7 +152,7 @@ namespace NetSuiteIntegeration.Tasks
                             //update netsuiteId property
                             InvoiceLst[counter].Netsuite_Id = Convert.ToInt32(rf.internalId.ToString());
                             //add item to the tuple
-                            iDs.Add(new Tuple<int, string>(Convert.ToInt32(rf.internalId.ToString()), InvoiceLst[counter].id.ToString()));
+                            iDs.Add(new Tuple<int, int, int>(Convert.ToInt32(rf.internalId.ToString()), InvoiceLst[counter].Location_Id, InvoiceLst[counter].Subsidiary_Id));
                         }
                         catch (Exception ex)
                         {
@@ -162,7 +163,7 @@ namespace NetSuiteIntegeration.Tasks
 
 
                 GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild> objDAO = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>();
-                objDAO.MainUpdateNetsuiteIDs(iDs, "AdjustmentBuild");
+                objDAO.UpdateNetsuiteID_ADjustement(iDs, "AdjustmentBuild");
             }
             catch (Exception ex)
             {

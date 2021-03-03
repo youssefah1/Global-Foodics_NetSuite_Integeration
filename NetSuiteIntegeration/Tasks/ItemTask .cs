@@ -18,9 +18,8 @@ namespace NetSuiteIntegeration.Tasks
            
 
                 
-                //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
-                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id >=1200 and inactive=0 and Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
-            //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id=1085 and Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
+                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and inactive=0 and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
+                //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id>=1200 and inactive=0 and Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
 
             List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
             List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
@@ -72,6 +71,9 @@ namespace NetSuiteIntegeration.Tasks
                     //check if new or can be updated
                     if (Obj.Netsuite_Id > 0)
                         NewItemObject.internalId = Obj.Netsuite_Id.ToString();
+
+                    NewItemObject.trackLandedCost = true;
+                    NewItemObject.trackLandedCostSpecified = true;
 
                     NewItemObject.pricingMatrix = Helper.GeneratePricingMatrix(objSetting, Obj.Price);
                     if (Obj.Category_Id > 0)

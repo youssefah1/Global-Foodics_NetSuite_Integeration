@@ -23,9 +23,11 @@ namespace Foodics.NetSuite.Shared.DAO
 
             if (Order_Status == 4)
                 query.Append(@" and  ProductStatus =3");
+
             query.Append(" )and Order_Status=" + Order_Status + " and (Invoice.Netsuite_Id IS NULL or Invoice.Netsuite_Id =0) ");
 
-            //query.Append(" and Location_Id = 205 ");
+            //query.Append(" and Location_Id = 206 ");
+            //query.Append(" and Invoice.id = 194 ");
 
             using (db)
             {
@@ -55,6 +57,8 @@ namespace Foodics.NetSuite.Shared.DAO
                             AND ISNULL(InvoiceItem.AdjustementBuilt, 0) = 0
                             AND ISNULL(Invoice.Netsuite_Id, 0) > 0
                             AND Invoice.Order_Status=5
+                            AND InvoiceItem.ProductStatus=6
+                            AND InvoiceItem.Item_Type='AssemblyItem'
 
                             INSERT INTO [dbo].[AdjustmentBuild]
                                        (
@@ -86,7 +90,7 @@ namespace Foodics.NetSuite.Shared.DAO
 
         public List<AdjustmentBuild> SelectAdjustmentLocation()
         {
-            string query = @" SELECT     distinct top(200)  *
+            string query = @" SELECT     distinct top(200)    *
                          FROM            AdjustmentBuild
 						 where  (Netsuite_Id IS NULL or Netsuite_Id =0) ";
 
@@ -122,7 +126,7 @@ namespace Foodics.NetSuite.Shared.DAO
                         set invitem.Item_Id = item.Netsuite_Id
                         FROM [dbo].[InvoiceItem] AS invitem
                         INNER JOIN Item ON invitem.FoodicsItem_Id = item.Foodics_Id
-                        WHERE ISNULL(invitem.Item_Id, 0) = 0");
+                        WHERE ISNULL(invitem.Item_Id, 0) = 0 and ISNULL(item.Netsuite_Id, 0) > 0" ) ;
 
 
             using (db)
@@ -152,8 +156,9 @@ namespace Foodics.NetSuite.Shared.DAO
                             INTO #Assembly
                             FROM InvoiceItem INNER JOIN invoice ON InvoiceItem.Invoice_Id = Invoice.Id
                             AND ISNULL(InvoiceItem.AssemblyBuilt, 0) = 0
-                            AND ISNULL(Invoice.Netsuite_Id, 0) > 0
                             AND Invoice.Order_Status=4
+                            AND InvoiceItem.ProductStatus=3
+                            AND InvoiceItem.Item_Type='AssemblyItem'
 
                             INSERT INTO[dbo].[AssemblyBuild]
                                        (

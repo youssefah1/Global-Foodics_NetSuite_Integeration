@@ -47,7 +47,8 @@ namespace NetSuiteIntegeration.Tasks
 
             //Define Array of credit Memo Then Loop
             CreditMemo[] memoList = new CreditMemo[returnList.Count];
-
+            CreditMemoItem[] memoitemarr;
+            CreditMemoItem invoiceItemObject;
             //add return id + return netsuite id to credit memo table, credit memo netsuite id
             #region Add Credit Memoes to CreditMemo Array
 
@@ -94,52 +95,36 @@ namespace NetSuiteIntegeration.Tasks
 
 
                     #region Item List
-                    List<Foodics.NetSuite.Shared.Model.InvoiceItem> itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere("Invoice_Id =" + invoiceReturn.Id + " and isnull(Item_Id,0) >0 ");
+                    List<Foodics.NetSuite.Shared.Model.InvoiceItem> itemLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.InvoiceItem>().GetWhere(" ProductStatus =6 and Invoice_Id =" + invoiceReturn.Id + " and isnull(Item_Id,0) >0 ");
+                    int DiscountItems = itemLst.Where(x => x.Line_Discount_Amount > 0).Count();
+                    //Define Invoice Items List
+                    int totalItems = itemLst.Count + DiscountItems;
+                    memoitemarr = new CreditMemoItem[totalItems];
                     if (itemLst.Count > 0)
                     {
                         CreditMemoItemList crdtmemoitmlst = new CreditMemoItemList();
-                        CreditMemoItem[] memoitemarr = new CreditMemoItem[itemLst.Count];
 
                         try
                         {
+                            int arr = 0;
                             for (int k = 0; k < itemLst.Count; k++)
                             {
                                 Foodics.NetSuite.Shared.Model.InvoiceItem itemDetails = itemLst[k];
-                                CreditMemoItem invoiceItemObject = new CreditMemoItem();
-
-                                // tax code
-                                RecordRef taxCode = new RecordRef();
-                                taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString();
-                                taxCode.type = RecordType.taxAcct;
-                                invoiceItemObject.taxCode = taxCode;
-
-                                // item
-                                RecordRef item = new RecordRef();
-                                item.internalId = itemDetails.Item_Id.ToString();
-                                item.type = (RecordType)Enum.Parse(typeof(RecordType), itemDetails.Item_Type, true);
-                                invoiceItemObject.item = item;
-
-                                if (Utility.ConvertToInt(itemDetails.Units) > 0)
-                                {
-                                    RecordRef unit = new RecordRef();
-                                    unit.internalId = itemDetails.Units.ToString();
-                                    unit.type = RecordType.unitsType;
-                                    invoiceItemObject.units = unit;
-                                }
-
-                                // price level
-                                #region price level
-                                RecordRef price = new RecordRef();
-                                price.type = RecordType.priceLevel;
-                                price.internalId = "-1";
-                                invoiceItemObject.price = price;
-                                invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
-                                #endregion
-                                invoiceItemObject.quantitySpecified = true;
-                                invoiceItemObject.quantity = itemDetails.Quantity;
-
-
+                                invoiceItemObject = CreateCreditItem(objSetting, itemDetails);
                                 memoitemarr[k] = invoiceItemObject;
+                                if (itemDetails.Line_Discount_Amount > 0)
+                                {
+                                    float Discount = itemDetails.Line_Discount_Amount;
+                                    k++;
+                                    Foodics.NetSuite.Shared.Model.InvoiceItem OtherCharge = new Foodics.NetSuite.Shared.Model.InvoiceItem();
+                                    OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id; 
+                                    OtherCharge.Amount = Discount * -1;
+                                    OtherCharge.Quantity = 1;
+                                    OtherCharge.Item_Type = "OtherChargeResaleItem";
+                                    invoiceItemObject = CreateCreditItem(objSetting, OtherCharge);
+                                    memoitemarr[k] = invoiceItemObject;
+                                }
+                                arr++;
                             }
                         }
                         catch (Exception ex)
@@ -154,11 +139,39 @@ namespace NetSuiteIntegeration.Tasks
 
                     #endregion
 
+                    #region Discount
+                    if (invoiceReturn.Total_Discount > 0)
+                    {
+                        RecordRef discountitem = new RecordRef();
+                        discountitem.type = RecordType.discountItem;
+                        memo.discountItem = discountitem;
+
+                        memo.discountRate = (Math.Round((invoiceReturn.Total_Discount / 1.15), 3) * -1).ToString();
+                        if (invoiceReturn.Discount_Id > 0)
+                            discountitem.internalId = invoiceReturn.Discount_Id.ToString();
+                        else
+                            discountitem.internalId = objSetting.DiscountItem_Netsuite_Id.ToString();
+                    }
+                    else
+                        memo.discountRate = "0";
+
+                    StringCustomFieldRef orderDiscount = new StringCustomFieldRef();
+                    orderDiscount.scriptId = "custbody_da_invoice_discount";
+                    orderDiscount.value = invoiceReturn.Total_Discount.ToString();
+
+                    if (invoiceReturn.Accounting_Discount_Item != 0)
+                    {
+                        RecordRef discItem = new RecordRef();
+                        discItem.internalId = invoiceReturn.Accounting_Discount_Item.ToString();
+                        discItem.type = RecordType.discountItem;
+                        memo.discountItem = discItem;
+                    }
+                    #endregion
 
 
                     memoList[i] = memo;
                 }
-               
+
             }
 
             //Post Memos to Netsuite
@@ -167,11 +180,48 @@ namespace NetSuiteIntegeration.Tasks
 
             if (receiptresult)
             {
-                
+
                 UpdatedInvoice(returnList, memoWR);
             }
             #endregion
             return memoWR;
+        }
+
+        private CreditMemoItem CreateCreditItem(Setting objSetting, Foodics.NetSuite.Shared.Model.InvoiceItem itemDetails)
+        {
+            CreditMemoItem invoiceItemObject = new CreditMemoItem();
+
+            // tax code
+            RecordRef taxCode = new RecordRef();
+            taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString();
+            taxCode.type = RecordType.taxAcct;
+            invoiceItemObject.taxCode = taxCode;
+
+            // item
+            RecordRef item = new RecordRef();
+            item.internalId = itemDetails.Item_Id.ToString();
+            item.type = (RecordType)Enum.Parse(typeof(RecordType), itemDetails.Item_Type, true);
+            invoiceItemObject.item = item;
+
+            if (Utility.ConvertToInt(itemDetails.Units) > 0)
+            {
+                RecordRef unit = new RecordRef();
+                unit.internalId = itemDetails.Units.ToString();
+                unit.type = RecordType.unitsType;
+                invoiceItemObject.units = unit;
+            }
+
+            // price level
+            #region price level
+            RecordRef price = new RecordRef();
+            price.type = RecordType.priceLevel;
+            price.internalId = "-1";
+            invoiceItemObject.price = price;
+            invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
+            #endregion
+            invoiceItemObject.quantitySpecified = true;
+            invoiceItemObject.quantity = itemDetails.Quantity;
+            return invoiceItemObject;
         }
 
         private void UpdatedInvoice(List<Foodics.NetSuite.Shared.Model.Invoice> InvoiceLst, WriteResponseList responseLst)
@@ -208,8 +258,8 @@ namespace NetSuiteIntegeration.Tasks
                 LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
             }
         }
-       
-       
-       
+
+
+
     }
 }

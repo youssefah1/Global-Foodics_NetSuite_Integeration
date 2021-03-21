@@ -11,11 +11,12 @@ using Foodics.NetSuite.Shared;
 using Invoice = NetSuiteIntegeration.com.netsuite.webservices.Invoice;
 using InvoiceItem = NetSuiteIntegeration.com.netsuite.webservices.InvoiceItem;
 using System.Reflection;
+using System.Configuration;
 
 namespace NetSuiteIntegeration.Tasks
 {
 
-    
+
     public class AssemblyBuildTask : NetSuiteBaseIntegration
     {
         //public InvoiceTask()
@@ -31,79 +32,99 @@ namespace NetSuiteIntegeration.Tasks
         }
         public override Int64 Set(string parametersArr)
         {
-            try
+
+            new CustomDAO().InvoiceRelatedUpdate();
+            new CustomDAO().GenerateAssemblyBuild();
+
+            List<Foodics.NetSuite.Shared.Model.AssemblyBuild> lstitemsAll = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>().GetWhere(" item_id >0 and (Netsuite_Id IS NULL or Netsuite_Id =0)").Take(1000).ToList();
+            //for (int xx = 0; xx < 5; xx++)
+            int Exe_length = 200;
+            int lstend = Exe_length;
+            if (lstitemsAll.Count > 0)
             {
-                new CustomDAO().GenerateAssemblyBuild();
-                //get recentrly added invoices after creating the return
-                List<Foodics.NetSuite.Shared.Model.AssemblyBuild> ColLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>().GetWhere(" item_id >0 and (Netsuite_Id IS NULL or Netsuite_Id =0)").Take(200).ToList();
-                bool result = true;
-                if (ColLst.Count > 0)
+                for (int Index = 0; Index < lstitemsAll.Count; Index += Exe_length)
                 {
-                    #region variables
-                    com.netsuite.webservices.AssemblyBuild[] AssemblyArr = new com.netsuite.webservices.AssemblyBuild[ColLst.Count];
-                    Foodics.NetSuite.Shared.Model.AssemblyBuild Obj_info;
-                    com.netsuite.webservices.AssemblyBuild AssemblyBuildObject;
-                    RecordRef  Mainitem, 
-                             subsid,  location;
-                    #endregion
-                    for (int i = 0; i < ColLst.Count; i++)
+                    if (Index + Exe_length >= lstitemsAll.Count)
+                        lstend = lstitemsAll.Count - Index;
+
+                    List<Foodics.NetSuite.Shared.Model.AssemblyBuild> ColLst = lstitemsAll.GetRange(Index, lstend);
+
+
+                    try
                     {
-                        try
+
+                        //get recentrly added invoices after creating the return
+
+                        bool result = true;
+                        if (ColLst.Count > 0)
                         {
-                            Obj_info = ColLst[i];
-                            //Netsuite invoice type
-                            AssemblyBuildObject = new com.netsuite.webservices.AssemblyBuild();
-                            AssemblyBuildObject.quantity = Obj_info.Quantity;
-                            AssemblyBuildObject.quantitySpecified = true;
+                            #region variables
+                            com.netsuite.webservices.AssemblyBuild[] AssemblyArr = new com.netsuite.webservices.AssemblyBuild[ColLst.Count];
+                            Foodics.NetSuite.Shared.Model.AssemblyBuild Obj_info;
+                            com.netsuite.webservices.AssemblyBuild AssemblyBuildObject;
+                            RecordRef Mainitem,
+                                     subsid, location;
+                            #endregion
+                            for (int i = 0; i < ColLst.Count; i++)
+                            {
+                                try
+                                {
+                                    Obj_info = ColLst[i];
+                                    //Netsuite invoice type
+                                    AssemblyBuildObject = new com.netsuite.webservices.AssemblyBuild();
+                                    AssemblyBuildObject.quantity = Obj_info.Quantity;
+                                    AssemblyBuildObject.quantitySpecified = true;
 
-                            Mainitem = new RecordRef();
-                            Mainitem.internalId = Obj_info.Item_Id.ToString(); //objSetting.Location_Netsuite_Id.ToString();
-                            Mainitem.type = RecordType.assemblyItem;
-                            AssemblyBuildObject.item = Mainitem;
+                                    Mainitem = new RecordRef();
+                                    Mainitem.internalId = Obj_info.Item_Id.ToString(); //objSetting.Location_Netsuite_Id.ToString();
+                                    Mainitem.type = RecordType.assemblyItem;
+                                    AssemblyBuildObject.item = Mainitem;
 
-                            AssemblyBuildObject.tranDateSpecified = true;
-                            AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 02, 14), TimeZoneInfo.Local);
+                                    AssemblyBuildObject.tranDateSpecified = true;
+                                    AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 01, 01), TimeZoneInfo.Local);
+                                    //AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]), TimeZoneInfo.Local);
 
-                            location = new RecordRef();
-                            location.internalId = Obj_info.Location_Id.ToString(); //objSetting.Location_Netsuite_Id.ToString();
-                            location.type = RecordType.location;
-                            AssemblyBuildObject.location = location;
+                                    location = new RecordRef();
+                                    location.internalId = Obj_info.Location_Id.ToString(); //objSetting.Location_Netsuite_Id.ToString();
+                                    location.type = RecordType.location;
+                                    AssemblyBuildObject.location = location;
 
-                            subsid = new RecordRef();
-                            subsid.internalId = Obj_info.Subsidiary_Id.ToString();
-                            subsid.type = RecordType.subsidiary;
-                            AssemblyBuildObject.subsidiary = subsid;
-                          
-                            AssemblyArr[i] = AssemblyBuildObject;
+                                    subsid = new RecordRef();
+                                    subsid.internalId = Obj_info.Subsidiary_Id.ToString();
+                                    subsid.type = RecordType.subsidiary;
+                                    AssemblyBuildObject.subsidiary = subsid;
+
+                                    AssemblyArr[i] = AssemblyBuildObject;
+                                }
+                                catch (Exception ex)
+                                {
+                                    ColLst.RemoveAt(i);
+                                    LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
+                                }
+                            }
+                            // Send invoice list to netsuite
+                            WriteResponseList wr = Service(true).addList(AssemblyArr);
+                            result = wr.status.isSuccess;
+                            if (result)
+                            {
+                                //Update database with returned Netsuite ids
+                                Updatedlst(ColLst, wr);
+
+                            }
+
                         }
-                        catch (Exception ex)
-                        {
-                            ColLst.RemoveAt(i);
-                            LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
-                        }
+
+                        // post customerPayment to netsuite
+                        //  bool postPayments = PostCustomerPayment();
                     }
-                    // Send invoice list to netsuite
-                    WriteResponseList wr = Service(true).addList(AssemblyArr);
-                    result = wr.status.isSuccess;
-                    if (result)
+                    catch (Exception ex)
                     {
-                        //Update database with returned Netsuite ids
-                        Updatedlst(ColLst, wr);
-                      
+                        LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
                     }
 
                 }
 
-                // post customerPayment to netsuite
-              //  bool postPayments = PostCustomerPayment();
             }
-            catch (Exception ex)
-            {
-                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
-            }
-
-
-
             return 0;
         }
 
@@ -129,7 +150,7 @@ namespace NetSuiteIntegeration.Tasks
                         }
                         catch (Exception ex)
                         {
-                         //   LogDAO.Integration_Exception(LogIntegrationType.Error, TaskRunType.POST, "InvoiceTask UpdateDB Counter Error", "Error " + ex.Message + " Count = " + counter.ToString());
+                            //   LogDAO.Integration_Exception(LogIntegrationType.Error, TaskRunType.POST, "InvoiceTask UpdateDB Counter Error", "Error " + ex.Message + " Count = " + counter.ToString());
                         }
                     }
                 }
@@ -142,12 +163,13 @@ namespace NetSuiteIntegeration.Tasks
                 GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild> objDAO = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>();
                 objDAO.MainUpdateNetsuiteIDs(iDs, "AssemblyBuild");
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
-                
+
             }
         }
 
-       
+
     }
 }

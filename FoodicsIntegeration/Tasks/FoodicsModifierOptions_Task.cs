@@ -82,6 +82,7 @@ namespace FoodicsIntegeration.Tasks
                     //barcode
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
                     Netsuiteitem.Item_Type = (int)Item_Type.ServiceSaleItem;
+                    Netsuiteitem.Item_Type_Name = nameof(Item_Type.ServiceSaleItem);
                     Netsuiteitem.Name_Ar = Foodicsitem.name_localized;
                     Netsuiteitem.Name_En = Foodicsitem.name;
                     Netsuiteitem.Display_Name_Ar = Foodicsitem.name_localized;
@@ -97,7 +98,7 @@ namespace FoodicsIntegeration.Tasks
                 }
 
                 new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst);
-               
+
             }
             catch (Exception ex)
             {

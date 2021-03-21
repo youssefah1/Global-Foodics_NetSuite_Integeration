@@ -82,6 +82,7 @@ namespace FoodicsIntegeration.Tasks
                     //barcode
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
                     Netsuiteitem.Item_Type = (int)Item_Type.AssemblyItem;
+                    Netsuiteitem.Item_Type_Name = nameof(Item_Type.AssemblyItem); 
                     Netsuiteitem.Name_Ar = Foodicsitem.name_localized;
                     Netsuiteitem.Name_En = Foodicsitem.name;
                     Netsuiteitem.Display_Name_Ar = Foodicsitem.name_localized;

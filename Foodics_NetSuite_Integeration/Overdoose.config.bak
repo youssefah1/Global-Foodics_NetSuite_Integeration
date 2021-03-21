@@ -4,8 +4,8 @@
     <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
   </startup>
   <connectionStrings>
-    <!--<add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Foodics_NetSuite_Integeration;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />-->
    <add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Overdoose_Production;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />
+   <!-- <add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Delicious_NetSuite_Integeration;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />-->
   </connectionStrings>
   <runtime>
     <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
@@ -60,15 +60,11 @@
     </assemblyBinding>
   </runtime>
   <appSettings>
-    
-    <!-- FoodicsSandBox
-    <add key="Foodics.Token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImM3ZDdhZjhkYmQ3NTkyNmZlZTZjODlkOTA2ZDcyNzUwOWFjMDBkYjMzYTRjMjE0Zjc4OGQ3N2ViOGY2MWUwODYxODkzMTk2M2ZlYWNjMzMyIn0.eyJhdWQiOiI5MTRjNjgzMy0wMGJmLTQ2ZDMtODZmZC0wNDkyZDMzMjgxNWMiLCJqdGkiOiJjN2Q3YWY4ZGJkNzU5MjZmZWU2Yzg5ZDkwNmQ3Mjc1MDlhYzAwZGIzM2E0YzIxNGY3ODhkNzdlYjhmNjFlMDg2MTg5MzE5NjNmZWFjYzMzMiIsImlhdCI6MTU5NzU3MzYyNCwibmJmIjoxNTk3NTczNjI0LCJleHAiOjE3NTUzNDAwMjMsInN1YiI6IjkxMWJmNWRlLTljNjQtNGM3My05YmMzLTkzODE5NjllYzQ0ZSIsInNjb3BlcyI6W10sImJ1c2luZXNzIjoiOTExYmY1ZGUtOWQ3MC00NWY0LTkwZWQtMTA5MjRkNTNmYmY4IiwicmVmZXJlbmNlIjoiNDE3Nzg1In0.Fq1mhSHnHP8jd5onmn8u1ZnMqwtPM1LRo0C6-5bu8J5qZJODJkKZ9b-a_noB-a54zliefcX382-ysHav2-sZhmz4Uj6AsX8Me4E9mXtFZjbKi9QOJ1Vj8Y4cmfschuRzFUAczKJno02qwfrtM4NF0pJ82UzwPp82SInxcnX032Kg3-aZ-k05oQY21oF4WCCJEZcfZ6re8XnDuHRhmNF7wMnctAC8AGonIqP5miErrbC9teZJmHTltpFjR9u5lNc5zjf1gqLrD7ZQm8wZXposiGrvP9w98OpAZ0tAhBNNuCwV_-dl-lLfmdmKA5gP6QjN7u6GNMyO4KVjYoS-ZKf0HAIyWn4XX4bCJvGDW3q9jsG0DJmFgvh86q5ivV2k9leU8DSt_qc_nlzIbSywdXLycCRsH-tZ3n887Z5DH8XxtkQi_E-RfNdWEF53YzfPvsJs8yyWjqqFja4aG9eiEhW1R9bQ-cqss1B0b0wxawmxkmUq2ezM-N1EbiQQpbqbOWJtGpeoJ3T1krUiRpZOdbQkg7bgfBFQJeaPQnfBj5e7iXrTNIyKiDL7yjtGQdOiO1At-RNoCc5hhfs3xCe3Y_yKwHi3vR7VIp4_aGPnDeBUxj-WP1-SGTlFbVNUIcAR-x9Q-WO8GYdEzpDWtWpdHHTJpaM04btrmzPvX-lX58M6GlE" />
-    <add key="Foodics.ResetURL" value="https://api-sandbox.foodics.com/v5/" />
-    -->
+
     <add key="OverdoseFoodics.Token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVkMzkyOGYzODc2ZGEzNjM5OWViMThiMjE0YTdmYzE3ZmI0NmRlZDRmNmRlNTZiNDFkMzdhZDgxOWYxM2FiYWEzYzM1NjU2YmZmNTVkMjQwIn0.eyJhdWQiOiI5MGQ1YTcxOC1lMzBkLTQ5ODYtODY0Ni0wNjdlZDBkMzdkMGUiLCJqdGkiOiJlZDM5MjhmMzg3NmRhMzYzOTllYjE4YjIxNGE3ZmMxN2ZiNDZkZWQ0ZjZkZTU2YjQxZDM3YWQ4MTlmMTNhYmFhM2MzNTY1NmJmZjU1ZDI0MCIsImlhdCI6MTYwOTQyNzYyNCwibmJmIjoxNjA5NDI3NjI0LCJleHAiOjE2NDA5NjM2MjQsInN1YiI6Il8yNzlnOTM5NyIsInNjb3BlcyI6WyJnZW5lcmFsLnJlYWQiLCJvcmRlcnMuZ2lmdF9jYXJkcy5yZWFkIiwib3JkZXJzLmxpc3QiLCJpbnZlbnRvcnkuc2V0dGluZ3MucmVhZCIsImludmVudG9yeS50cmFuc2FjdGlvbnMucmVhZCIsImN1c3RvbWVycy5saXN0IiwibWVudS5pbmdyZWRpZW50cy5yZWFkIl0sImJ1c2luZXNzIjoiOTAzMTMwODYtNDM2OC00M2Q5LTg5NmItNzQ0NTZkMmYyZTBlIiwicmVmZXJlbmNlIjoiNDE2NzIwIn0.k5liV1JM3CGGFFZAyGGjJwBEC3R1hV1qAJDkeTOC-vpLoB4MT9l69QfyludNzaeYolIEEPJEYOyIuNqhfjJjbQAJeXbN8jdIEL8OD_8V2tftjFSJ3P036Ac98T62-pO9rO6fQ-hgxG6q4W9jeCn94As7UVlgYfB1Yb0CQXscj0M7OcxLvc8bydH6CJ8X-nCqfZk-WoJWdRVj7AorvRC6vVcYRmRTMZDZKsO0LGjrxttGl2Fsjs2kbL16U9vAk5IPe7VoeTW9J4CGRImBAX3LG063i8lLuyY5nvrlfPsBjd4b0Q-oRcEIfWikAF2lwuqFZH2KZgQk39x-F1gQeaFt0mtwEDe4EeHoUAXJyNZPCJlrXhABZC_YK_IkF5EDxBRkT9uYU9FEIo2q39p13PlCiZRYvATJR2kJiX8tANrt2kZZWQnqN5V7u9ZwYYqMEgmDlQO9-MBFxv7Ok9liUi_AWSSh-hgtY7sq8yFueQkHsQbfHcPfXN0NKDJMMYgpNaQncZ4UwGe0gY7LOi3a65ZQLFty363K5LNu25G2QNUkMelKQW_zEBBN89wms_lSyYiOp-pT8mrPySyYjrZ7ZIRyH3r0AcbNmlXaRkZ10OLr9Qq1kAwRdeU8gywiSvzd6zuC6Gyh0PRPUUMvM-NzyDuH-HGyXG-ERwdBrIeXSwbBXtk" />
     <add key="OverdoseFoodics.ResetURL" value="https://api.foodics.com/v5/" />
     <add key="OverdoseNetsuite.Subsidiary_Id" value="4" />
-    
+
     <!-- Global Netsuite Keys-->
     <add key="com.netsuite.webservices.netsuite" value="https://webservices.netsuite.com/services/NetSuitePort_2018_1" />
     <add key="promptForLogin" value="false" />
@@ -76,28 +72,8 @@
     <add key="login.password" value="P@ssw0rd123n" />
     <add key="login.roleNSkey" value="1006" />
     <add key="login.useTba" value="true" />
-    
-    <!-- 
-    <add key="promptForLogin" value="false"/>
-    <add key="login.acct" value="5394792"/>
-    <add key="login.appId" value="8253C9F9-47EB-4B65-B18D-90FC77D506B2"/>
-    <add key="login.useTba" value="true"/>
-    <add key="login.tbaConsumerKey" value="c5445581d9649dc0a19bea0ccecc889cfdeedcbebaa14973c870aa9b978e02ba"/>
-    <add key="login.tbaConsumerSecret" value="55f7294cc350896a81e184cf19a677a34862f54a71a6dd19a3a71074ec6fb05a"/>
-    <add key="login.tbaTokenId" value="3d52c08c640f09ef24645776f55f5174ad6bfb395840a61c743dc2b933c9866d"/>
-    <add key="login.tbaTokenSecret" value="182a2caa276ddcf3ef64ba5f0e94be682a8c9d8ddd69bc33855cf7670030c80e"/>-->
-    
-    <!-- Overdoose SandBox
-    <add key="login.acct" value="6249838_SB1" />
-    <add key="login.appId" value="8D37F960-D9E5-4768-969A-C97F8BDE3425" />
-    <add key="login.tbaConsumerKey" value="cdc1f5257caa2b72a23411e73e8a454b85c53edd8f689f6354d02480163369c8" />
-    <add key="login.tbaConsumerSecret" value="812ed343247a423f3fde7cb3980a8f9b9ec520bcea84364f9378ecd72dfb9d9c" />
-    <add key="login.tbaTokenId" value="0fa1f7c3be432ec2e1cfe8063e39957802af8010304c47e6923dab59d609dfa5" />
-    <add key="login.tbaTokenSecret" value="fcac544ee1b81fa359447cb876f40bd2b6cac1758b107a39f6112628662caf03" />
-    <add key="ClientSettingsProvider.ServiceUri" value="" />
-    <add key="TaskRunType" value="3" />--><!-- 1 for master Data ,  2 For invoices,   -->
-    
-    <!-- Overdoose Production 
+
+    <!-- Overdoose Production -->
     <add key="login.acct" value="6249838" />
     <add key="login.appId" value="EFE4755E-1A8C-460B-B590-B064F5520D8C" />
     <add key="login.tbaConsumerKey" value="91cddd9e7021572c3ac837e3e0fe1e37a679c9ef70448a3f67ca868823026756" />
@@ -105,8 +81,10 @@
     <add key="login.tbaTokenId" value="ab8591780fa9d1e69fe67f9040110880be15634a51fdfba42b85453cd21d31bd" />
     <add key="login.tbaTokenSecret" value="efab41c5e1c5929945583c10044ceb2b4740950c7808328894cd04094f7fcd97" />
     <add key="ClientSettingsProvider.ServiceUri" value="" />
-    <add key="TaskRunType" value="3" />-->
+    <add key="TaskRunType" value="1" />
+    <add key="InvoiceDate" value="2021-02-17" />
     <!-- 1 for master Data ,  2 For invoices,   -->
+    
     
   </appSettings>
   <system.web>

@@ -11,6 +11,7 @@ using Foodics.NetSuite.Shared;
 using Invoice = NetSuiteIntegeration.com.netsuite.webservices.Invoice;
 using InvoiceItem = NetSuiteIntegeration.com.netsuite.webservices.InvoiceItem;
 using System.Reflection;
+using System.Configuration;
 
 namespace NetSuiteIntegeration.Tasks
 {
@@ -60,7 +61,8 @@ namespace NetSuiteIntegeration.Tasks
 
                         AdjustBuildObject.tranDateSpecified = true;
                         //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
-                        AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 02, 14), TimeZoneInfo.Local);
+                        AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 01, 01), TimeZoneInfo.Local);
+                        //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]), TimeZoneInfo.Local);
 
                         // adjustment account
                         RecordRef adjustment_account = new RecordRef();

@@ -8,6 +8,7 @@ using Foodics.NetSuite.Shared.DAO;
 using Foodics.NetSuite.Shared.Model;
 using System.Data;
 using Foodics.NetSuite.Shared;
+using System.Configuration;
 
 namespace NetSuiteIntegeration.Tasks
 {
@@ -17,7 +18,10 @@ namespace NetSuiteIntegeration.Tasks
         {
             try
             {
-                List<Foodics.NetSuite.Shared.Model.Customer> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere("Netsuite_Id IS NULL or Netsuite_Id =0").Take(200).ToList();
+                //List<Foodics.NetSuite.Shared.Model.Customer> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere("Netsuite_Id IS NULL or Netsuite_Id =0").Take(200).ToList();
+                List<Foodics.NetSuite.Shared.Model.Customer> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  (Foodics_UpdateDate >= '"+ ConfigurationManager.AppSettings["InvoiceDate"] + "')").Take(200).ToList();
+               
+
                 //if (objSetting == null)
                 //    return 0;
                 if (Lst_Items.Count <= 0)

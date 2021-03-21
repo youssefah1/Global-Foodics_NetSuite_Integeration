@@ -31,26 +31,8 @@ namespace FoodicsIntegeration.Tasks
                 {
                     if (item.Key == "data")
                     {
-
-                        //List<Branches> lst = item.Value;
                         if (item.Value.Count > 0)
                         {
-                            //object fromDateObj = new GenericeDAO<FoodicsBranche>().GetLatestModifiedDate();
-                            //DateTime fromDate = new DateTime();
-                            //if (fromDateObj == null)
-                            //{
-                            //    fromDate = DateTime.Now;
-                            //}
-                            //else
-                            //{
-                            //    fromDate = (DateTime)fromDateObj;
-                            //    //fromDate = fromDate.AddDays(6);
-                            //}
-
-                            // Generate_Save_NetSuiteLst(lstitems.Where(x => x.updated_at >= fromDate).ToList());
-
-
-                            //  new GenericeDAO<FoodicsBranche>().FoodicsIntegration(item.Value.Where(x => x.updated_at >= fromDate).ToList());
                             Generate_Save_NetSuiteLst(item.Value, Subsidiary);
                         }
 
@@ -73,8 +55,8 @@ namespace FoodicsIntegeration.Tasks
                     Location Netsuiteitem = new Location();
                     //barcode
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
-                    Netsuiteitem.Name_Ar = Foodicsitem.name_localized + " - " + Foodicsitem.reference + " - " + Subsidiary;
-                    Netsuiteitem.Name_En = Foodicsitem.name + " - " + Foodicsitem.reference + " - " + Subsidiary;
+                    Netsuiteitem.Name_Ar = Foodicsitem.name_localized;
+                    Netsuiteitem.Name_En = Foodicsitem.name;
                     Netsuiteitem.InActive = Foodicsitem.deleted_at.Year == 1 ? false : true;
 
                     Netsuiteitem.Latitude = Foodicsitem.latitude;

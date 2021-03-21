@@ -23,11 +23,12 @@ namespace Foodics.NetSuite.Shared.DAO
 
             if (Order_Status == 4)
                 query.Append(@" and  ProductStatus =3");
-
+            if (Order_Status == 5)
+                query.Append(" and Invoice.[Original_Foodics_Id] in (select invparnt.[Foodics_Id] from [dbo].[Invoice] invparnt where invparnt.[Foodics_Id]= Invoice.[Original_Foodics_Id]and isnull(invparnt.Netsuite_Id,0)>0  ) ");
             query.Append(" )and Order_Status=" + Order_Status + " and (Invoice.Netsuite_Id IS NULL or Invoice.Netsuite_Id =0) ");
 
             //query.Append(" and Location_Id = 206 ");
-            //query.Append(" and Invoice.id = 194 ");
+            query.Append(" and Invoice.[Date]>='2021-03-15' ");
 
             using (db)
             {
@@ -43,6 +44,7 @@ namespace Foodics.NetSuite.Shared.DAO
 						 where isnull(Invoice.Netsuite_Id,0)>0 and Invoice.Order_Status=" + Order_Status +
                      " and (PaymentMethodEntity.Netsuite_Id IS NULL or PaymentMethodEntity.Netsuite_Id =0) ";
 
+            query +=" and Invoice.[Date]>='2021-03-15' ";
             using (db)
             {
                 return db.Query<PaymentMethodEntity>(query).ToList();
@@ -59,6 +61,7 @@ namespace Foodics.NetSuite.Shared.DAO
                             AND Invoice.Order_Status=5
                             AND InvoiceItem.ProductStatus=6
                             AND InvoiceItem.Item_Type='AssemblyItem'
+                            and Invoice.[Date]>='2021-03-15'
 
                             INSERT INTO [dbo].[AdjustmentBuild]
                                        (
@@ -119,29 +122,37 @@ namespace Foodics.NetSuite.Shared.DAO
             }
 
         }
-        public void UpdateInvoiceItem()
+        //public void UpdateInvoiceItem()
+        //{
+        //    //select* FROM[dbo].[InvoiceItem] AS invitem                        WHERE ISNULL(invitem.Item_Id, 0) = 0
+        //    StringBuilder query = new StringBuilder();
+        //    query.Append(@" update invitem
+        //                set invitem.Item_Id = item.Netsuite_Id,
+        //                    invitem.Item_Type = item.Item_Type_Name
+        //                FROM [dbo].[InvoiceItem] AS invitem
+        //                INNER JOIN Item ON invitem.FoodicsItem_Id = item.Foodics_Id
+        //                WHERE ISNULL(invitem.Item_Id, 0) = 0 and ISNULL(item.Netsuite_Id, 0) > 0") ;
+
+
+        //    using (db)
+        //    {
+        //        db.ExecuteScalar(query.ToString());
+        //    }
+
+        //}
+
+
+        public void InvoiceRelatedUpdate()
         {
             StringBuilder query = new StringBuilder();
+            query.Append(" update [dbo].[InvoiceItem] set[Invoice_Id] = (select[Id] from[dbo].[Invoice] where [InvoiceItem].[Foodics_Id] = [Invoice].[Foodics_Id]) where[Invoice_Id] is null or  [Invoice_Id] = 0 ");
+            query.Append(" update [dbo].[PaymentMethodEntity] set[Entity_Id] = (select[Id] from[dbo].[Invoice] where [PaymentMethodEntity].[Foodics_Id] = [Invoice].[Foodics_Id]) where[Entity_Id] is null or  [Entity_Id] = 0 ");
             query.Append(@" update invitem
-                        set invitem.Item_Id = item.Netsuite_Id
+                        set invitem.Item_Id = item.Netsuite_Id,
+                            invitem.Item_Type = item.Item_Type_Name
                         FROM [dbo].[InvoiceItem] AS invitem
                         INNER JOIN Item ON invitem.FoodicsItem_Id = item.Foodics_Id
-                        WHERE ISNULL(invitem.Item_Id, 0) = 0 and ISNULL(item.Netsuite_Id, 0) > 0" ) ;
-
-
-            using (db)
-            {
-                db.ExecuteScalar(query.ToString());
-            }
-
-        }
-
-
-        public void InvoiceDetailsUpdateID()
-        {
-            StringBuilder query = new StringBuilder();
-            query.Append(" update [dbo].[InvoiceItem] set[Invoice_Id] = (select[Id] from[dbo].[Invoice] where [InvoiceItem].[Foodics_Id] = [Invoice].[Foodics_Id]) where[Invoice_Id] is null or  [Invoice_Id] = 0 ;");
-            query.Append(" update [dbo].[PaymentMethodEntity] set[Entity_Id] = (select[Id] from[dbo].[Invoice] where [PaymentMethodEntity].[Foodics_Id] = [Invoice].[Foodics_Id]) where[Entity_Id] is null or  [Entity_Id] = 0");
+                        WHERE ISNULL(invitem.Item_Id, 0) = 0 and ISNULL(item.Netsuite_Id, 0) > 0" );
             using (db)
             {
                 db.ExecuteScalar(query.ToString());
@@ -159,6 +170,7 @@ namespace Foodics.NetSuite.Shared.DAO
                             AND Invoice.Order_Status=4
                             AND InvoiceItem.ProductStatus=3
                             AND InvoiceItem.Item_Type='AssemblyItem'
+                            And [Date]>='2021-03-15'
 
                             INSERT INTO[dbo].[AssemblyBuild]
                                        (

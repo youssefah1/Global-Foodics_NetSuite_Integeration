@@ -14,9 +14,6 @@ namespace NetSuiteIntegeration.Tasks
 {
     public class LocationTask : NetSuiteBaseIntegration
     {
-        //protected List<Model.ItemSubsidiary> subsidiaryListLocal = new List<Model.ItemSubsidiary>();
-        //protected List<Model.Item> itemWithImages = new List<Model.Item>();
-        //protected List<Model.ItemOptionListValue> ItemOptionList = new List<Model.ItemOptionListValue>();
         public override Int64 Set(string parametersArr)
         {
             List<Foodics.NetSuite.Shared.Model.Location> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Location>().GetWhere("Netsuite_Id IS NULL or Netsuite_Id =0");
@@ -27,52 +24,37 @@ namespace NetSuiteIntegeration.Tasks
             try
             {
 
-                RecordRef[] subsidiarylst = new RecordRef[1];
+                
                 com.netsuite.webservices.Location[] ItemArr = new com.netsuite.webservices.Location[Lst_Items.Count];
                 for (int i = 0; i < Lst_Items.Count; i++)
-                //for (int i = 0; i < 1; i++)
                 {
                     Foodics.NetSuite.Shared.Model.Location Obj = Lst_Items[i];
-
+                    RecordRef[] subsidiarylst = new RecordRef[1];
                     com.netsuite.webservices.Location NewItemObject = new com.netsuite.webservices.Location();
-
                     NewItemObject.name = Obj.Name_En.Length <30? Obj.Name_En: Obj.Name_En.Substring(0,30);
-
-
-
                     NewItemObject.latitude = Utility.ConvertToDouble(Obj.Latitude);
                     NewItemObject.longitude = Utility.ConvertToDouble(Obj.Longitude);
-
-
-
-
+                    
                     RecordRef subsidiary = new RecordRef();
                     subsidiary.internalId = Obj.Subsidiary_Id.ToString();
                     subsidiary.type = RecordType.subsidiary;
                     subsidiarylst[0] = subsidiary;
                     NewItemObject.subsidiaryList = subsidiarylst;
 
-
-
                     if (Obj.InActive)
                     {
                         NewItemObject.isInactive = true;
                         NewItemObject.isInactiveSpecified = true;
                     }
-
-
                     ItemArr[i] = NewItemObject;
                 }
-                // Send order list to netsuite
                 WriteResponseList wr = Service(true).addList(ItemArr);
                 bool result = wr.status.isSuccess;
                 if (result)
                 {
-                    //Update database with returned Netsuite ids
                     UpdatedLst(Lst_Items, wr);
                 }
             }
-
             catch (Exception ex)
             {
                 LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);

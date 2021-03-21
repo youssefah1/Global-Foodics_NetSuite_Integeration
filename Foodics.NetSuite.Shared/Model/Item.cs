@@ -8,6 +8,7 @@ namespace Foodics.NetSuite.Shared.Model
 		public int Netsuite_Id { get; set; }
 		public int Parent_Netsuite_Id { get; set; }
 		public int Item_Type { get; set; }
+		public string Item_Type_Name { get; set; }
 		public int Category_Id { get; set; }
 		public string Name_En { get; set; }
 		public string Name_Ar { get; set; }

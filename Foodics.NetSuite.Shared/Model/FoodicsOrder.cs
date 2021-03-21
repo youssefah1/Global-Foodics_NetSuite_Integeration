@@ -99,6 +99,7 @@ namespace Foodics.NetSuite.Shared.Model
 
 		public string id { get; set; }
 		public string sku { get; set; }
+		public string name { get; set; }
 	}
 
 	public class payments

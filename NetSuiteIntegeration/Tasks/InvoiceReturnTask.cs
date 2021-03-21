@@ -34,8 +34,9 @@ namespace NetSuiteIntegeration.Tasks
                     if (invoiceLst.Count > 0)
                         CreateCreditMemo(invoiceLst);
                 }
-                catch
+                catch(Exception ex)
                 {
+                    LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
                     return 0;
                 }
 
@@ -56,7 +57,7 @@ namespace NetSuiteIntegeration.Tasks
             {
                 Foodics.NetSuite.Shared.Model.Invoice invoiceReturn = returnList[i];
                 Foodics.NetSuite.Shared.Model.Invoice invoiceoriginal = new GenericeDAO<Foodics.NetSuite.Shared.Model.Invoice>().GetWhere(" Foodics_Id = '" + invoiceReturn.Original_Foodics_Id + "'").FirstOrDefault();
-                if (invoiceoriginal.Netsuite_Id > 0)
+                if (invoiceoriginal!= null && invoiceoriginal.Netsuite_Id > 0)
                 {
                     Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + invoiceReturn.Subsidiary_Id).FirstOrDefault();
 
@@ -107,9 +108,9 @@ namespace NetSuiteIntegeration.Tasks
                         try
                         {
                             int arr = 0;
-                            for (int k = 0; k < itemLst.Count; k++)
+                            for (int k = 0; k < totalItems; k++)
                             {
-                                Foodics.NetSuite.Shared.Model.InvoiceItem itemDetails = itemLst[k];
+                                Foodics.NetSuite.Shared.Model.InvoiceItem itemDetails = itemLst[arr];
                                 invoiceItemObject = CreateCreditItem(objSetting, itemDetails);
                                 memoitemarr[k] = invoiceItemObject;
                                 if (itemDetails.Line_Discount_Amount > 0)

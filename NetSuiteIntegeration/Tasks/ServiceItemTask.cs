@@ -74,10 +74,11 @@ namespace NetSuiteIntegeration.Tasks
 
                     NewItemObject.pricingMatrix = Helper.GeneratePricingMatrix(objSetting, Obj.Price);
                    
+
                     CustomFieldRef[] custFieldList = new CustomFieldRef[] {
 
                         new StringCustomFieldRef {
-                            value = Obj.Name_Ar.ToString(),
+                            value = Obj.Name_Ar!= null? Obj.Name_Ar:"",
                             scriptId = "custitem_da_item_name_ar"
                         }
                        

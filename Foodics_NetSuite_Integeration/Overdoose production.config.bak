@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <startup>
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+  </startup>
+  <connectionStrings>
+   <add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Overdoose_Production;Persist Security Info=True;User ID=sa;Password=P@ssw0rd;Connection Timeout=1000000" providerName="System.Data.SqlClient" />
+   <!-- <add name="ConString" connectionString="Data Source=DESKTOP-S12821P\SQLEXPRESS;Initial Catalog=Delicious_NetSuite_Integeration;Persist Security Info=True;User ID=sa;Password=P@ssw0rd" providerName="System.Data.SqlClient" />-->
+  </connectionStrings>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="System.Runtime.CompilerServices.Unsafe" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.6.0" newVersion="4.0.6.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Memory" publicKeyToken="cc7b13ffcd2ddd51" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.1.1" newVersion="4.0.1.1" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Extensions.Primitives" publicKeyToken="adb9793829ddae60" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.1.4.0" newVersion="3.1.4.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Extensions.Configuration.Abstractions" publicKeyToken="adb9793829ddae60" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.1.4.0" newVersion="3.1.4.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Extensions.FileProviders.Abstractions" publicKeyToken="adb9793829ddae60" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.1.4.0" newVersion="3.1.4.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Extensions.FileSystemGlobbing" publicKeyToken="adb9793829ddae60" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.1.4.0" newVersion="3.1.4.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Extensions.Configuration" publicKeyToken="adb9793829ddae60" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.1.4.0" newVersion="3.1.4.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Extensions.FileProviders.Physical" publicKeyToken="adb9793829ddae60" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.1.4.0" newVersion="3.1.4.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Threading.Tasks.Extensions" publicKeyToken="cc7b13ffcd2ddd51" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.2.0.1" newVersion="4.2.0.1" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.ValueTuple" publicKeyToken="cc7b13ffcd2ddd51" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.3.0" newVersion="4.0.3.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Buffers" publicKeyToken="cc7b13ffcd2ddd51" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.3.0" newVersion="4.0.3.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Microsoft.Extensions.Configuration.FileExtensions" publicKeyToken="adb9793829ddae60" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-3.1.4.0" newVersion="3.1.4.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+  <appSettings>
+
+    <add key="OverdoseFoodics.Token" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVkMzkyOGYzODc2ZGEzNjM5OWViMThiMjE0YTdmYzE3ZmI0NmRlZDRmNmRlNTZiNDFkMzdhZDgxOWYxM2FiYWEzYzM1NjU2YmZmNTVkMjQwIn0.eyJhdWQiOiI5MGQ1YTcxOC1lMzBkLTQ5ODYtODY0Ni0wNjdlZDBkMzdkMGUiLCJqdGkiOiJlZDM5MjhmMzg3NmRhMzYzOTllYjE4YjIxNGE3ZmMxN2ZiNDZkZWQ0ZjZkZTU2YjQxZDM3YWQ4MTlmMTNhYmFhM2MzNTY1NmJmZjU1ZDI0MCIsImlhdCI6MTYwOTQyNzYyNCwibmJmIjoxNjA5NDI3NjI0LCJleHAiOjE2NDA5NjM2MjQsInN1YiI6Il8yNzlnOTM5NyIsInNjb3BlcyI6WyJnZW5lcmFsLnJlYWQiLCJvcmRlcnMuZ2lmdF9jYXJkcy5yZWFkIiwib3JkZXJzLmxpc3QiLCJpbnZlbnRvcnkuc2V0dGluZ3MucmVhZCIsImludmVudG9yeS50cmFuc2FjdGlvbnMucmVhZCIsImN1c3RvbWVycy5saXN0IiwibWVudS5pbmdyZWRpZW50cy5yZWFkIl0sImJ1c2luZXNzIjoiOTAzMTMwODYtNDM2OC00M2Q5LTg5NmItNzQ0NTZkMmYyZTBlIiwicmVmZXJlbmNlIjoiNDE2NzIwIn0.k5liV1JM3CGGFFZAyGGjJwBEC3R1hV1qAJDkeTOC-vpLoB4MT9l69QfyludNzaeYolIEEPJEYOyIuNqhfjJjbQAJeXbN8jdIEL8OD_8V2tftjFSJ3P036Ac98T62-pO9rO6fQ-hgxG6q4W9jeCn94As7UVlgYfB1Yb0CQXscj0M7OcxLvc8bydH6CJ8X-nCqfZk-WoJWdRVj7AorvRC6vVcYRmRTMZDZKsO0LGjrxttGl2Fsjs2kbL16U9vAk5IPe7VoeTW9J4CGRImBAX3LG063i8lLuyY5nvrlfPsBjd4b0Q-oRcEIfWikAF2lwuqFZH2KZgQk39x-F1gQeaFt0mtwEDe4EeHoUAXJyNZPCJlrXhABZC_YK_IkF5EDxBRkT9uYU9FEIo2q39p13PlCiZRYvATJR2kJiX8tANrt2kZZWQnqN5V7u9ZwYYqMEgmDlQO9-MBFxv7Ok9liUi_AWSSh-hgtY7sq8yFueQkHsQbfHcPfXN0NKDJMMYgpNaQncZ4UwGe0gY7LOi3a65ZQLFty363K5LNu25G2QNUkMelKQW_zEBBN89wms_lSyYiOp-pT8mrPySyYjrZ7ZIRyH3r0AcbNmlXaRkZ10OLr9Qq1kAwRdeU8gywiSvzd6zuC6Gyh0PRPUUMvM-NzyDuH-HGyXG-ERwdBrIeXSwbBXtk" />
+    <add key="OverdoseFoodics.ResetURL" value="https://api.foodics.com/v5/" />
+    <add key="OverdoseNetsuite.Subsidiary_Id" value="4" />
+
+    <!-- Global Netsuite Keys-->
+    <add key="com.netsuite.webservices.netsuite" value="https://webservices.netsuite.com/services/NetSuitePort_2018_1" />
+    <add key="promptForLogin" value="false" />
+    <add key="login.email" value="yousef.ahmad@digitalarenas.net" />
+    <add key="login.password" value="P@ssw0rd123n" />
+    <add key="login.roleNSkey" value="1006" />
+    <add key="login.useTba" value="true" />
+
+    <!-- Overdoose Production -->
+    <add key="login.acct" value="6249838" />
+    <add key="login.appId" value="EFE4755E-1A8C-460B-B590-B064F5520D8C" />
+    <add key="login.tbaConsumerKey" value="91cddd9e7021572c3ac837e3e0fe1e37a679c9ef70448a3f67ca868823026756" />
+    <add key="login.tbaConsumerSecret" value="7c7b5abe3005b9663b67caa5fc7040075f8b9c394898e6ac701237aa5cca1cf6" />
+    <add key="login.tbaTokenId" value="ab8591780fa9d1e69fe67f9040110880be15634a51fdfba42b85453cd21d31bd" />
+    <add key="login.tbaTokenSecret" value="efab41c5e1c5929945583c10044ceb2b4740950c7808328894cd04094f7fcd97" />
+    <add key="ClientSettingsProvider.ServiceUri" value="" />
+    <add key="TaskRunType" value="1" />
+    <add key="InvoiceDate" value="2021-02-17" />
+    <!-- 1 for master Data ,  2 For invoices,   -->
+    
+    
+  </appSettings>
+  <system.web>
+    <membership defaultProvider="ClientAuthenticationMembershipProvider">
+      <providers>
+        <add name="ClientAuthenticationMembershipProvider" type="System.Web.ClientServices.Providers.ClientFormsAuthenticationMembershipProvider, System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" serviceUri="" />
+      </providers>
+    </membership>
+    <roleManager defaultProvider="ClientRoleProvider" enabled="true">
+      <providers>
+        <add name="ClientRoleProvider" type="System.Web.ClientServices.Providers.ClientRoleProvider, System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" serviceUri="" cacheTimeout="86400" />
+      </providers>
+    </roleManager>
+  </system.web>
+</configuration>

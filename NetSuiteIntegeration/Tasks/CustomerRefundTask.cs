@@ -15,7 +15,7 @@ namespace NetSuiteIntegeration.Tasks
     {
         public override Int64 Set(string parametersArr)
         {
-            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> returnList = new CustomDAO().SelectCustomerPayment(5);
+            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> returnList = new CustomDAO().SelectCustomerPayment(5).Take(200).ToList();
             try
             {
                 if (returnList.Count > 0)

@@ -101,6 +101,7 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
                     if (Foodicsitem.category != null && !string.IsNullOrEmpty(Foodicsitem.category.id))
                     {
+                        Netsuiteitem.FoodicsCategory_Id = Foodicsitem.category.id;
                         Categories.FoodicsCategories obj = new GenericeDAO<Categories.FoodicsCategories>().GetByFoodicsId(Foodicsitem.category.id);
                         Netsuiteitem.Category_Id = obj.Netsuite_Id;
                     }

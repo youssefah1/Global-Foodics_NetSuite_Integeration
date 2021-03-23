@@ -30,7 +30,7 @@ namespace NetSuiteIntegeration.Tasks
                 //}
                 //fromDate = fromDate.AddDays(-2);
 
-                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere("  (Netsuite_Id IS NULL or Netsuite_Id =0) and inactive=0 and  (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
+                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere("  (Netsuite_Id IS NULL or Netsuite_Id =0) and inactive=0 and  (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem).Take(200).ToList();
                 //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id >= 1238  and inactive=0 and  (Foodics_Id in (select ItemFoodics_Id from ItemCompnent))   and Item_Type=" + (int)Item_Type.AssemblyItem);
 
                 List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
@@ -73,7 +73,7 @@ namespace NetSuiteIntegeration.Tasks
 
         public com.netsuite.webservices.AssemblyItem[] GenerateNetSuitelst(List<Item> Lst_Items)
         {
-            RecordRef[] subsidiarylst = new RecordRef[1];
+            
             Price[] pricelst = new Price[1];
             Pricing[] Pricinglst = new Pricing[1];
             com.netsuite.webservices.AssemblyItem[] ItemArr = new com.netsuite.webservices.AssemblyItem[Lst_Items.Count];
@@ -88,9 +88,9 @@ namespace NetSuiteIntegeration.Tasks
 
                     if (Obj.Netsuite_Id <= 0)
                     {
-                        NewItemObject.displayName = Obj.Display_Name_En;
+                        NewItemObject.displayName = Obj.Display_Name_En + " 3 ";
                         //NewItemObject.itemId = Obj.UPC_Code;
-                        NewItemObject.itemId = Obj.Display_Name_En;
+                        NewItemObject.itemId = Obj.Display_Name_En + " 3 ";
                     }
                     RecordRef classref = new RecordRef();
                     classref.internalId = Obj.Category_Id.ToString();
@@ -146,7 +146,8 @@ namespace NetSuiteIntegeration.Tasks
                             Itemref.type = RecordType.inventoryItem;
 
                             obj.item = Itemref;
-                            obj.quantity = itmcompobj.Quantity;
+                            
+                            obj.quantity = itmcompobj.Quantity==0?1: itmcompobj.Quantity;
                             obj.quantitySpecified = true;
                             ItemMemberlst[x] = obj;
                         }
@@ -236,7 +237,7 @@ namespace NetSuiteIntegeration.Tasks
                     Tax_Schedule.internalId = objSetting.TaxSchedule_Netsuite_Id.ToString();
                     Tax_Schedule.type = RecordType.salesTaxItem;
                     NewItemObject.taxSchedule = Tax_Schedule;
-
+                    RecordRef[] subsidiarylst = new RecordRef[1];
                     RecordRef subsidiary = new RecordRef();
                     subsidiary.internalId = Obj.Subsidiary_Id.ToString();
                     subsidiary.type = RecordType.subsidiary;

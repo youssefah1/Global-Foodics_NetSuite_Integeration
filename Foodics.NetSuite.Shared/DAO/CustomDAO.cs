@@ -17,7 +17,7 @@ namespace Foodics.NetSuite.Shared.DAO
         {
             StringBuilder query = new StringBuilder();
             //ProductStatus =3 closed product
-            query.Append(@" SELECT     distinct top(200)  Invoice.*
+            query.Append(@" SELECT     distinct top(2000)  Invoice.*
                          FROM            Invoice
 						 where Invoice.Id in (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) >0 ");
 
@@ -26,6 +26,9 @@ namespace Foodics.NetSuite.Shared.DAO
             if (Order_Status == 5)
                 query.Append(" and Invoice.[Original_Foodics_Id] in (select invparnt.[Foodics_Id] from [dbo].[Invoice] invparnt where invparnt.[Foodics_Id]= Invoice.[Original_Foodics_Id]and isnull(invparnt.Netsuite_Id,0)>0  ) ");
             query.Append(" )and Order_Status=" + Order_Status + " and (Invoice.Netsuite_Id IS NULL or Invoice.Netsuite_Id =0) ");
+            if (Order_Status == 4)
+                query.Append(@"  and Invoice.Id  not in 
+						 (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) = 0 and  ProductStatus =3)");
 
             //query.Append(" and Location_Id = 206 ");
             query.Append(" and Invoice.[Date]>='2021-03-15' ");
@@ -37,7 +40,7 @@ namespace Foodics.NetSuite.Shared.DAO
         }
         public List<PaymentMethodEntity> SelectCustomerPayment(int Order_Status)
         {
-            string query = @" SELECT   distinct top(200)     PaymentMethodEntity.*
+            string query = @" SELECT   distinct top(2000)     PaymentMethodEntity.*
                           FROM            Invoice INNER JOIN
                          PaymentMethodEntity ON Invoice.Id = PaymentMethodEntity.Entity_Id
 
@@ -140,7 +143,22 @@ namespace Foodics.NetSuite.Shared.DAO
         //    }
 
         //}
+        public void SetItemClass()
+        {
+            StringBuilder query = new StringBuilder();
+            query.Append(@" update item
+                        set[Category_Id] = [Categories].Netsuite_Id
+                        from item
+                        inner join [dbo].[Categories]
+                        on [dbo].[Categories].[Foodics_Id] = item.[FoodicsCategory_Id]
+                        where [FoodicsCategory_Id] is not NULL and isnull([Category_Id],0)= 0
+                        and isnull([Categories].Netsuite_Id,0) > 0 ");
+            using (db)
+            {
+                db.ExecuteScalar(query.ToString());
+            }
 
+        }
 
         public void InvoiceRelatedUpdate()
         {

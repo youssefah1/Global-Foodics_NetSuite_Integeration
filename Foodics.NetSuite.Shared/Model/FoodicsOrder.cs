@@ -36,6 +36,7 @@ namespace Foodics.NetSuite.Shared.Model
 		public DateTime created_at { get; set; }
 		public DateTime updated_at { get; set; }
 		public DateTime deleted_at { get; set; }
+		public DateTime closed_at { get; set; }
 		public List<Products> Products { get; set; }
 		public int status { get; set; }//4 closed,5 Returned
 		public List<payments> payments { get; set; }

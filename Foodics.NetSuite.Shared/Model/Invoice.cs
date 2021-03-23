@@ -13,8 +13,10 @@ namespace Foodics.NetSuite.Shared.Model
         public int Customer_Payment_Netsuite_Id { get; set; }
         public int Customer_Id { get; set; }
         public DateTime Date { get; set; }
-        public DateTime AsOfDate { get; set; }
-
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
+        public DateTime OpenAt { get; set; }
+        public DateTime CloseAt { get; set; }
         public string CreatedBy { get; set; }
         public string Number { get; set; }
         public string Source { get; set; }

@@ -20,6 +20,7 @@ namespace FoodicsIntegeration.Tasks
         {
             int Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
             object fromDateObj = new GenericeDAO<Invoice>().GetLatestModifiedDate(Subsidiary_Id, "CreateDate");
+            //string str = ((string)fromDateObj).ToString("yyyy-MM-dd");
             DateTime fromDate = new DateTime();
             if (fromDateObj == null)
             {
@@ -32,13 +33,14 @@ namespace FoodicsIntegeration.Tasks
             {
                 fromDate = (DateTime)fromDateObj;
             }
+            fromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day).AddDays(-2);
             while (fromDate <= DateTime.Now)
             {
-                string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
-                //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,combos.products.product,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[id]=f9f112a5-f469-4c29-800b-ac37214a451c";
+                string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[updated_after]=" + fromDate.ToString("yyyy-MM-dd");
+                //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,combos.products.product,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[id]=f830395d-7db5-48dc-8082-5a53369db729";
                 string NextPage = MainURL;
 
-                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:"+ NextPage);
+                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
                 do
                 {
                     var client = new RestClient(NextPage);
@@ -74,7 +76,7 @@ namespace FoodicsIntegeration.Tasks
                             }
                             catch (Exception ex)
                             {
-                                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message+" - Page index:"+ NextPage);
+                                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message + " - Page index:" + NextPage);
                             }
                         }
                         foreach (var item in response.Data)
@@ -103,160 +105,154 @@ namespace FoodicsIntegeration.Tasks
             {
                 int Exe_length = 10;
                 int lstend = Exe_length;
-                if (lstitemsAll.Count > 0)
+                List<Foodics.NetSuite.Shared.Model.PaymentMethod> PaymentMethodLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.PaymentMethod>().GetAll();
+                List<Invoice> Invoicelst = new List<Invoice>();
+                List<InvoiceItem> InvoiceItemlst = new List<InvoiceItem>();
+                List<PaymentMethodEntity> PaymentMethodEntitylst = new List<PaymentMethodEntity>();
+
+                foreach (var Foodicsitem in lstitemsAll)
                 {
-                    for (int Index = 0; Index < lstitemsAll.Count; Index += Exe_length)
+
+                    List<Foodics.NetSuite.Shared.Model.Invoice> invoiceLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.Invoice>().GetWhere(" Foodics_Id = '" + Foodicsitem.id + "'");
+                    if (invoiceLst.Count == 0 || (invoiceLst.Count > 0 && Utility.ConvertToInt(invoiceLst[0].Netsuite_Id.ToString()) <= 0))
                     {
-                        if (Index + Exe_length >= lstitemsAll.Count)
-                            lstend = lstitemsAll.Count - Index;
+                        Invoice Netsuiteitem = new Invoice();
+                        //barcode
+                        Netsuiteitem.Foodics_Id = Foodicsitem.id;
+                        Netsuiteitem.Order_Status = Foodicsitem.status;
+                        Netsuiteitem.Subsidiary_Id = Subsidiary_Id;
 
-                        List<FoodicsOrder> lstitems = lstitemsAll.GetRange(Index>0? Index-1: Index, lstend);
-
-                        List<Foodics.NetSuite.Shared.Model.PaymentMethod> PaymentMethodLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.PaymentMethod>().GetAll();
-                        List<Invoice> Invoicelst = new List<Invoice>();
-                        List<InvoiceItem> InvoiceItemlst = new List<InvoiceItem>();
-                        List<PaymentMethodEntity> PaymentMethodEntitylst = new List<PaymentMethodEntity>();
-
-                        foreach (var Foodicsitem in lstitems)
+                        if (Foodicsitem.original_order != null && !string.IsNullOrEmpty(Foodicsitem.original_order.id))
                         {
+                            Netsuiteitem.Original_Foodics_Id = Foodicsitem.original_order.id;
+                        }
+                        else
+                        {
+                            Netsuiteitem.Original_Foodics_Id = "0";
+                        }
 
-                            List<Foodics.NetSuite.Shared.Model.Invoice> invoiceLst = new GenericeDAO<Foodics.NetSuite.Shared.Model.Invoice>().GetWhere(" Foodics_Id = '" + Foodicsitem.id + "'");
-                            if (invoiceLst.Count == 0 || (invoiceLst.Count > 0 && Utility.ConvertToInt(invoiceLst[0].Netsuite_Id.ToString()) <= 0))
+                        if (Foodicsitem.Customer != null && !string.IsNullOrEmpty(Foodicsitem.Customer.Id))
+                        {
+                            Customer obj = new GenericeDAO<Customer>().GetByFoodicsId(Foodicsitem.Customer.Id);
+                            if (obj != null && Utility.ConvertToInt(obj.Id) > 0)
                             {
-                                Invoice Netsuiteitem = new Invoice();
-                                //barcode
-                                Netsuiteitem.Foodics_Id = Foodicsitem.id;
-                                Netsuiteitem.Order_Status = Foodicsitem.status;
-                                Netsuiteitem.Subsidiary_Id = Subsidiary_Id;
-
-                                if (Foodicsitem.original_order != null && !string.IsNullOrEmpty(Foodicsitem.original_order.id))
-                                {
-                                    Netsuiteitem.Original_Foodics_Id = Foodicsitem.original_order.id;
-                                }
-                                else
-                                {
-                                    Netsuiteitem.Original_Foodics_Id = "0";
-                                }
-
-                                if (Foodicsitem.Customer != null && !string.IsNullOrEmpty(Foodicsitem.Customer.Id))
-                                {
-                                    Customer obj = new GenericeDAO<Customer>().GetByFoodicsId(Foodicsitem.Customer.Id);
-                                    if (obj != null && Utility.ConvertToInt(obj.Id) > 0)
-                                    {
-                                        Netsuiteitem.Customer_Id = Utility.ConvertToInt(obj.Id);
-                                        Netsuiteitem.Customer_Netsuite_Id = obj.Netsuite_Id;
-                                    }
-                                }
-                                else
-                                {
-                                    Netsuiteitem.Customer_Id = 0;
-                                    Netsuiteitem.Customer_Netsuite_Id = 0;
-                                }
-
-
-                                if (Foodicsitem.Branch != null && !string.IsNullOrEmpty(Foodicsitem.Branch.id))
-                                {
-                                    Location obj = new GenericeDAO<Location>().GetByFoodicsId(Foodicsitem.Branch.id);
-                                    Netsuiteitem.Location_Id = obj.Netsuite_Id;
-                                }
-                                else
-                                {
-                                    Netsuiteitem.Location_Id = 0;
-                                }
-
-                                //Invoice Discount
-                                if (Foodicsitem.discount != null && !string.IsNullOrEmpty(Foodicsitem.discount.id))
-                                {
-                                    Discount obj = new GenericeDAO<Discount>().GetByFoodicsId(Foodicsitem.discount.id);
-                                    if (obj != null && obj.Netsuite_Id > 0)
-                                        Netsuiteitem.Discount_Id = obj.Netsuite_Id;
-
-                                }
-                                //Foodics Source
-                                if (Foodicsitem.source > 0)
-                                    Netsuiteitem.Source = Enum.GetName(typeof(InvoiceSource), Foodicsitem.source);
-                                //Foodics CreatedBY
-                                if (Foodicsitem.creator != null && !string.IsNullOrEmpty(Foodicsitem.creator.id))
-                                {
-                                    Netsuiteitem.CreatedBy = Foodicsitem.creator.name;
-
-                                }
-                                Netsuiteitem.Invoice_Discount_Type = Foodicsitem.discount_type;
-                                Netsuiteitem.Total_Discount = (float)Foodicsitem.discount_amount;
-                                Netsuiteitem.Date = Foodicsitem.business_date;
-                                Netsuiteitem.AsOfDate = Foodicsitem.created_at;
-
-                                Netsuiteitem.Interval_Note = Foodicsitem.kitchen_notes + Foodicsitem.customer_notes;
-                                Netsuiteitem.Notes = Netsuiteitem.Interval_Note;
-
-                                Netsuiteitem.Paid = (float)Foodicsitem.total_price;
-                                Netsuiteitem.Net_Payable = (float)Foodicsitem.total_price;
-
-                                Netsuiteitem.BarCode = Foodicsitem.reference;
-                                Netsuiteitem.Number = Foodicsitem.number.ToString();
-                                //Products
-                                foreach (var prodobj in Foodicsitem.Products)
-                                {
-                                    //if (prodobj.status == 3)//3 is delivered
-                                    //{
-                                    GetProducts(InvoiceItemlst, Foodicsitem, prodobj, "", "");
-
-
-                                    //}
-                                }
-                                if (Foodicsitem.combos != null)
-                                {
-                                    foreach (var Comboobj in Foodicsitem.combos)
-                                    {
-                                        //if (prodobj.status == 3)//3 is delivered
-                                        //{
-                                        foreach (var prodobj in Comboobj.Products)
-                                        {
-                                            GetProducts(InvoiceItemlst, Foodicsitem, prodobj, Comboobj.combo_size.name, Comboobj.combo_size.combo.name);
-                                        }
-
-                                        //}
-                                    }
-                                }
-                                //payment methods
-                                foreach (var payobj in Foodicsitem.payments)
-                                {
-                                    PaymentMethod PaymentMethodobj = PaymentMethodLst.Where(x => x.Foodics_Id == payobj.payment_method.id).FirstOrDefault();
-
-                                    PaymentMethodEntity paymethod = new PaymentMethodEntity();
-
-                                    paymethod.Foodics_Id = Foodicsitem.id;
-
-                                    paymethod.Entity_Type = 1;
-                                    paymethod.Amount = (float)payobj.amount;
-                                    paymethod.Ref = payobj.payment_method.name;
-                                    paymethod.Notes = payobj.payment_method.name;
-                                    paymethod.Business_Date = payobj.Business_Date;
-                                    if (PaymentMethodobj != null && PaymentMethodobj.Netsuite_Id > 0)
-                                    {
-                                        paymethod.Payment_Method = PaymentMethodobj.Name_En;
-                                        paymethod.Payment_Method_Id = PaymentMethodobj.Netsuite_Id;
-                                        paymethod.Payment_Method_Percentage = PaymentMethodobj.Percentage;
-                                    }
-                                    else
-                                    {
-                                        paymethod.Payment_Method = "Cash";
-                                        paymethod.Payment_Method_Id = 1;
-                                        paymethod.Payment_Method_Percentage = 0;
-                                    }
-                                    paymethod.Payment_Method_Type = 0;
-                                    paymethod.Payment_Method_Type_Netsuite_Id = 0;
-                                    PaymentMethodEntitylst.Add(paymethod);
-                                }
-                                Invoicelst.Add(Netsuiteitem);
+                                Netsuiteitem.Customer_Id = Utility.ConvertToInt(obj.Id);
+                                Netsuiteitem.Customer_Netsuite_Id = obj.Netsuite_Id;
                             }
                         }
-                        new GenericeDAO<Invoice>().FoodicsIntegration(Invoicelst);
-                        new GenericeDAO<Invoice>().InvoiceDetailsDelete(Invoicelst);
-                        new GenericeDAO<InvoiceItem>().ListInsertOnly(InvoiceItemlst);
-                        new GenericeDAO<PaymentMethodEntity>().ListInsertOnly(PaymentMethodEntitylst);
+                        else
+                        {
+                            Netsuiteitem.Customer_Id = 0;
+                            Netsuiteitem.Customer_Netsuite_Id = 0;
+                        }
+
+
+                        if (Foodicsitem.Branch != null && !string.IsNullOrEmpty(Foodicsitem.Branch.id))
+                        {
+                            Location obj = new GenericeDAO<Location>().GetByFoodicsId(Foodicsitem.Branch.id);
+                            Netsuiteitem.Location_Id = obj.Netsuite_Id;
+                        }
+                        else
+                        {
+                            Netsuiteitem.Location_Id = 0;
+                        }
+
+                        //Invoice Discount
+                        if (Foodicsitem.discount != null && !string.IsNullOrEmpty(Foodicsitem.discount.id))
+                        {
+                            Discount obj = new GenericeDAO<Discount>().GetByFoodicsId(Foodicsitem.discount.id);
+                            if (obj != null && obj.Netsuite_Id > 0)
+                                Netsuiteitem.Discount_Id = obj.Netsuite_Id;
+
+                        }
+                        //Foodics Source
+                        if (Foodicsitem.source > 0)
+                            Netsuiteitem.Source = Enum.GetName(typeof(InvoiceSource), Foodicsitem.source);
+                        //Foodics CreatedBY
+                        if (Foodicsitem.creator != null && !string.IsNullOrEmpty(Foodicsitem.creator.id))
+                        {
+                            Netsuiteitem.CreatedBy = Foodicsitem.creator.name;
+
+                        }
+                        Netsuiteitem.Invoice_Discount_Type = Foodicsitem.discount_type;
+                        Netsuiteitem.Total_Discount = (float)Foodicsitem.discount_amount;
+                        Netsuiteitem.Date = Foodicsitem.business_date;
+                        Netsuiteitem.CreateAt = Foodicsitem.created_at;
+                        Netsuiteitem.OpenAt = Foodicsitem.opened_at;
+                        Netsuiteitem.CloseAt = Foodicsitem.closed_at;
+                        Netsuiteitem.UpdateAt = Foodicsitem.updated_at;
+
+                        Netsuiteitem.Interval_Note = Foodicsitem.kitchen_notes + Foodicsitem.customer_notes;
+                        Netsuiteitem.Notes = Netsuiteitem.Interval_Note;
+
+                        Netsuiteitem.Paid = (float)Foodicsitem.total_price;
+                        Netsuiteitem.Net_Payable = (float)Foodicsitem.total_price;
+
+                        Netsuiteitem.BarCode = Foodicsitem.reference;
+                        Netsuiteitem.Number = Foodicsitem.number.ToString();
+                        //Products
+                        foreach (var prodobj in Foodicsitem.Products)
+                        {
+                            //if (prodobj.status == 3)//3 is delivered
+                            //{
+                            GetProducts(InvoiceItemlst, Foodicsitem, prodobj, "", "");
+
+
+                            //}
+                        }
+                        if (Foodicsitem.combos != null)
+                        {
+                            foreach (var Comboobj in Foodicsitem.combos)
+                            {
+                                //if (prodobj.status == 3)//3 is delivered
+                                //{
+                                foreach (var prodobj in Comboobj.Products)
+                                {
+                                    GetProducts(InvoiceItemlst, Foodicsitem, prodobj, Comboobj.combo_size.name, Comboobj.combo_size.combo.name);
+                                }
+
+                                //}
+                            }
+                        }
+                        //payment methods
+                        foreach (var payobj in Foodicsitem.payments)
+                        {
+                            PaymentMethod PaymentMethodobj = PaymentMethodLst.Where(x => x.Foodics_Id == payobj.payment_method.id).FirstOrDefault();
+
+                            PaymentMethodEntity paymethod = new PaymentMethodEntity();
+
+                            paymethod.Foodics_Id = Foodicsitem.id;
+
+                            paymethod.Entity_Type = 1;
+                            paymethod.Amount = (float)payobj.amount;
+                            paymethod.Ref = payobj.payment_method.name;
+                            paymethod.Notes = payobj.payment_method.name;
+                            paymethod.Business_Date = payobj.Business_Date;
+                            if (PaymentMethodobj != null && PaymentMethodobj.Netsuite_Id > 0)
+                            {
+                                paymethod.Payment_Method = PaymentMethodobj.Name_En;
+                                paymethod.Payment_Method_Id = PaymentMethodobj.Netsuite_Id;
+                                paymethod.Payment_Method_Percentage = PaymentMethodobj.Percentage;
+                            }
+                            else
+                            {
+                                paymethod.Payment_Method = "Cash";
+                                paymethod.Payment_Method_Id = 1;
+                                paymethod.Payment_Method_Percentage = 0;
+                            }
+                            paymethod.Payment_Method_Type = 0;
+                            paymethod.Payment_Method_Type_Netsuite_Id = 0;
+                            PaymentMethodEntitylst.Add(paymethod);
+                        }
+                        Invoicelst.Add(Netsuiteitem);
                     }
                 }
+                new GenericeDAO<Invoice>().FoodicsIntegration(Invoicelst);
+                new GenericeDAO<Invoice>().InvoiceDetailsDelete(Invoicelst);
+                new GenericeDAO<InvoiceItem>().ListInsertOnly(InvoiceItemlst);
+                new GenericeDAO<PaymentMethodEntity>().ListInsertOnly(PaymentMethodEntitylst);
+                //    }
+                //}
             }
             catch (Exception ex)
             {
@@ -266,10 +262,10 @@ namespace FoodicsIntegeration.Tasks
 
         private static void GetProducts(List<InvoiceItem> InvoiceItemlst, FoodicsOrder Foodicsitem, Products prodobj, string ComboSize_Name, string Combo_Name)
         {
-            //Item itemobj = new GenericeDAO<Item>().GetWhere("Foodics_Id = '" + prodobj.Product.id + "' and ISNULL(Netsuite_Id, 0) > 0" ).FirstOrDefault();
-            Item itemobj = new GenericeDAO<Item>().GetWhere("Foodics_Id = '" + prodobj.Product.id + "'").FirstOrDefault();
-            //if (itemobj != null)
-            // {
+            List<Item> lstitemobj = new GenericeDAO<Item>().GetWhere("Foodics_Id = '" + prodobj.Product.id + "'").ToList();
+            Item itemobj = new Item();
+            if (lstitemobj.Count > 0)
+                itemobj = lstitemobj.FirstOrDefault();
             InvoiceItem Netsuiteinvoiceitem = new InvoiceItem();
             Netsuiteinvoiceitem.Foodics_Id = Foodicsitem.id;
             Netsuiteinvoiceitem.FoodicsItem_Id = prodobj.Product.id;

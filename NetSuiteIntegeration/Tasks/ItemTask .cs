@@ -74,8 +74,8 @@ namespace NetSuiteIntegeration.Tasks
 
                     NewItemObject.trackLandedCost = true;
                     NewItemObject.trackLandedCostSpecified = true;
-
-                    NewItemObject.pricingMatrix = Helper.GeneratePricingMatrix(objSetting, Obj.Price);
+                    if (Obj.Price > 0)
+                        NewItemObject.pricingMatrix = Helper.GeneratePricingMatrix(objSetting, Obj.Price);
                     if (Obj.Category_Id > 0)
                     {
                         objCatAccount = new GenericeDAO<Categories.CategoriesAccounts>().GetWhere("Netsuite_Id=" + Obj.Category_Id).FirstOrDefault();
@@ -130,12 +130,14 @@ namespace NetSuiteIntegeration.Tasks
                         unitsTyperef.type = RecordType.unitsType;
                         NewItemObject.unitsType = unitsTyperef;
 
-                        RecordRef unitsTyperefother = new RecordRef();
-                        unitsTyperefother.internalId = objunit.details_id.ToString();
-                        NewItemObject.saleUnit = unitsTyperefother;
-                        NewItemObject.stockUnit = unitsTyperefother;
-                        NewItemObject.purchaseUnit = unitsTyperefother;
-
+                        if (objunit.details_id > 0)
+                        {
+                            RecordRef unitsTyperefother = new RecordRef();
+                            unitsTyperefother.internalId = objunit.details_id.ToString();
+                            NewItemObject.saleUnit = unitsTyperefother;
+                            NewItemObject.stockUnit = unitsTyperefother;
+                            NewItemObject.purchaseUnit = unitsTyperefother;
+                        }
                     }
 
 

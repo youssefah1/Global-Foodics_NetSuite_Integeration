@@ -28,8 +28,8 @@ namespace NetSuiteIntegeration.Tasks
             {
                 Foodics.NetSuite.Shared.Model.Categories.FoodicsCategories Obj = Lst_Items[i];
                 com.netsuite.webservices.Classification NewItemObject = new com.netsuite.webservices.Classification();
-                
-                NewItemObject.name = Obj.name;
+
+                NewItemObject.name = Obj.name.Length > 30 ? Obj.name.Substring(0, 30) : Obj.name;
                 RecordRef subsidiary = new RecordRef();
                 subsidiary.internalId = Obj.Subsidiary_Id.ToString();
                 subsidiary.type = RecordType.subsidiary;
@@ -53,6 +53,7 @@ namespace NetSuiteIntegeration.Tasks
                 //Update database with returned Netsuite ids
                  UpdatedLst(Lst_Items, wr);
             }
+            new CustomDAO().InvoiceRelatedUpdate();
             return 0;
         }
 

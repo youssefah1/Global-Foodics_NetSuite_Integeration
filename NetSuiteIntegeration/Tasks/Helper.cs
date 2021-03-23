@@ -11,7 +11,7 @@ namespace NetSuiteIntegeration.Tasks
     class Helper
     {
 
-        public static PricingMatrix GeneratePricingMatrix(Setting objSetting,Double price)
+        public static PricingMatrix GeneratePricingMatrix(Setting objSetting, Double price)
         {
             Price[] pricelst = new Price[1];
             Pricing[] Pricinglst = new Pricing[1];
@@ -21,9 +21,10 @@ namespace NetSuiteIntegeration.Tasks
             Currency.internalId = objSetting.Currency_Netsuite_Id.ToString();
             //Currency.typeSpecified = true;
             // Currency.type = RecordType.account;
-
+            //for (int i = 0; i < 5; i++)
+            //{
             RecordRef PriceLevel = new RecordRef();
-            PriceLevel.internalId = objSetting.Price_Level_Netsuite_Id.ToString();
+            PriceLevel.internalId = "1";//objSetting.Price_Level_Netsuite_Id.ToString();
             PriceLevel.typeSpecified = true;
 
             PriceLevel.type = RecordType.priceLevel;
@@ -31,11 +32,10 @@ namespace NetSuiteIntegeration.Tasks
 
 
             Price objprice = new Price();
-            objprice.value = price;//Double.Parse(obj_ItemPrice.Price.ToString());
-            objprice.quantity = 1;//Double.Parse("1");
-                                  // objprice.value = Double.Parse(obj_ItemPrice.Price.ToString());
-                                  // objprice.quantity = Double.Parse(obj_ItemPrice.Price.ToString());
-            objprice.quantitySpecified = false;
+            objprice.value = price;
+            objprice.quantity = 0;//0 for item,1 for assembly
+                                
+            objprice.quantitySpecified = true;
             objprice.valueSpecified = true;
 
             pricelst[0] = objprice;
@@ -51,6 +51,8 @@ namespace NetSuiteIntegeration.Tasks
 
 
             Pricinglst[0] = objPricing;
+            //}
+
             //NewItemObject.taxSchedule = Tax_Schedule;
 
 

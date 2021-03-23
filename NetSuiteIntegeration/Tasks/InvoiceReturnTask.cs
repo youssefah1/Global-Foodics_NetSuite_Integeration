@@ -30,7 +30,7 @@ namespace NetSuiteIntegeration.Tasks
             {
                 try
                 {
-                    List<Foodics.NetSuite.Shared.Model.Invoice> invoiceLst = new CustomDAO().SelectInvoice(5);
+                    List<Foodics.NetSuite.Shared.Model.Invoice> invoiceLst = new CustomDAO().SelectInvoice(5).Take(200).ToList();
                     if (invoiceLst.Count > 0)
                         CreateCreditMemo(invoiceLst);
                 }
@@ -60,13 +60,15 @@ namespace NetSuiteIntegeration.Tasks
                 if (invoiceoriginal!= null && invoiceoriginal.Netsuite_Id > 0)
                 {
                     Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + invoiceReturn.Subsidiary_Id).FirstOrDefault();
-
+                    StringCustomFieldRef FoodicsRef, FoodicsNumb, CreatedBy, Source, orderDiscount;
+                    CustomFieldRef[] customFieldRefArray;
                     CreditMemo memo = new CreditMemo();
                     // Return
                     RecordRef returnRef = new RecordRef();
                     returnRef.internalId = invoiceoriginal.Netsuite_Id.ToString();
                     returnRef.type = RecordType.invoice;
                     memo.createdFrom = returnRef;
+
 
                     //Customer
 
@@ -155,11 +157,6 @@ namespace NetSuiteIntegeration.Tasks
                     }
                     else
                         memo.discountRate = "0";
-
-                    StringCustomFieldRef orderDiscount = new StringCustomFieldRef();
-                    orderDiscount.scriptId = "custbody_da_invoice_discount";
-                    orderDiscount.value = invoiceReturn.Total_Discount.ToString();
-
                     if (invoiceReturn.Accounting_Discount_Item != 0)
                     {
                         RecordRef discItem = new RecordRef();
@@ -167,6 +164,28 @@ namespace NetSuiteIntegeration.Tasks
                         discItem.type = RecordType.discountItem;
                         memo.discountItem = discItem;
                     }
+                    #region Custom Attributes
+                    orderDiscount = new StringCustomFieldRef();
+                    orderDiscount.scriptId = "custbody_da_invoice_discount";
+                    orderDiscount.value = invoiceReturn.Total_Discount.ToString();
+
+                   
+                    FoodicsRef = new StringCustomFieldRef();
+                    FoodicsRef.scriptId = "custbody_da_foodics_reference";
+                    FoodicsRef.value = invoiceReturn.BarCode.ToString();
+
+                    FoodicsNumb = new StringCustomFieldRef();
+                    FoodicsNumb.scriptId = "custbody_da_foodics_number";
+                    FoodicsNumb.value = invoiceReturn.Number.ToString();
+
+                    customFieldRefArray = new CustomFieldRef[3];
+                    customFieldRefArray[0] = orderDiscount;
+                    customFieldRefArray[1] = FoodicsRef;
+                    customFieldRefArray[2] = FoodicsNumb;
+
+                    memo.customFieldList = customFieldRefArray;
+                    #endregion
+                   
                     #endregion
 
 

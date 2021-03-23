@@ -21,31 +21,31 @@ namespace Foodics_NetSuite_Integeration
             string[] Subsidary = new string[1];
             Subsidary[0] = "Overdose";
             //string[] Subsidary = new string[2];
-            //Subsidary[0] = "Laviviane";
+           // Subsidary[0] = "Laviviane";
             //Subsidary[1] = "Monroe";
             foreach (string sub in Subsidary)
             {
                 LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " Start Running ", DateTime.Now.ToString());
                 //CustomFoodicsTaskCall(sub);
-                 GenerateRunningTask(sub);
+                GenerateRunningTask(sub);
                 LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " End Running ", DateTime.Now.ToString());
             }
 
             #region cutom task call
             //if (TaskRunType == 1)
-              //  CustomFoodicsTaskCall("Overdose");
+            //CustomFoodicsTaskCall("Overdose");
             //else
-            //    CustomNetSuiteTaskCall();
+            // CustomNetSuiteTaskCall();
             //for (int i = 0; i < 10; i++)
             //{
 
 
-               // CustomNetSuiteTaskCall();
+                //CustomNetSuiteTaskCall();
 
 
             //}
 
-           
+
             #endregion
 
         }
@@ -53,24 +53,25 @@ namespace Foodics_NetSuite_Integeration
         {
 
             NetSuiteBaseIntegration[] NetSuitetaskInitial = new NetSuiteBaseIntegration[1];
-            NetSuitetaskInitial[0] = new ServiceItemTask();
+           // NetSuitetaskInitial[0] = new ProductClassTask();
+            //NetSuitetaskInitial[0] = new ServiceItemTask();
             //NetSuitetaskInitial[0] = new LocationTask();
             //NetSuitetaskInitial[0] = new UnitsTypeTask();
             //NetSuitetaskInitial[0] = new CustomerTask();
-           // NetSuitetaskInitial[0] = new ItemTask();
+            // NetSuitetaskInitial[0] = new ItemTask();
             //NetSuitetaskInitial[0] = new PaymentMethodTask();
-            // NetSuitetaskInitial[1] = new ProductTask();
-           // NetSuitetaskInitial[2] = new ServiceItemTask();
+             NetSuitetaskInitial[0] = new ProductTask();
+            //            NetSuitetaskInitial[0] = new ServiceItemTask();
             //NetSuitetaskInitial[0] = new GiftTask();
             //NetSuitetaskInitial[0] = new DiscountTask();
 
             //NetSuitetaskInitial[0] = new AssemblyBuildTask();
-            //NetSuitetaskInitial[1] = new InvoiceTask();
-            //NetSuitetaskInitial[2] = new InvoiceReturnTask();
+            //NetSuitetaskInitial[0] = new InvoiceTask();
+            //NetSuitetaskInitial[0] = new InvoiceReturnTask();
             //NetSuitetaskInitial[3] = new AdjustmentBuildTask();
 
-           // NetSuitetaskInitial[0] = new CustomerPaymentTask();
-           // NetSuitetaskInitial[1] = new CustomerRefundTask();
+            //NetSuitetaskInitial[0] = new CustomerPaymentTask();
+            // NetSuitetaskInitial[1] = new CustomerRefundTask();
 
 
             foreach (NetSuiteBaseIntegration ts in NetSuitetaskInitial)
@@ -79,7 +80,7 @@ namespace Foodics_NetSuite_Integeration
                 {
                     
                     ts.Set("");
-                    ts.Get();
+                   // ts.Get();
                 }
                 catch (Exception ex)
                 {
@@ -90,10 +91,10 @@ namespace Foodics_NetSuite_Integeration
         private static void CustomFoodicsTaskCall(string Subsidary)
         {
             Foodics_BaseIntegration[] FoodicstaskInital = new Foodics_BaseIntegration[1];
-            FoodicstaskInital[0] = new FoodicsOrder_Task();
+            //FoodicstaskInital[0] = new FoodicsOrder_Task();
             //FoodicstaskInital[1] = new FoodicsPaymentMethod_Task();
             //FoodicstaskInital[0] = new FoodicsInventoryItem_Task();
-            //FoodicstaskInital[1] = new Foodicsproducts_Task();
+            FoodicstaskInital[0] = new Foodicsproducts_Task();
             //FoodicstaskInital[2] = new FoodicsModifierOptions_Task();
             foreach (Foodics_BaseIntegration ts in FoodicstaskInital)
             {
@@ -154,7 +155,7 @@ namespace Foodics_NetSuite_Integeration
 
  #endregion
                 //foodics integeration
-                Foodics_BaseIntegration[] FoodicstaskInital = new Foodics_BaseIntegration[8];
+                Foodics_BaseIntegration[] FoodicstaskInital = new Foodics_BaseIntegration[7];
 
                 FoodicstaskInital[0] = new FoodicsBranche_Task();
                 FoodicstaskInital[1] = new FoodicsPaymentMethod_Task();
@@ -163,7 +164,7 @@ namespace Foodics_NetSuite_Integeration
                 FoodicstaskInital[4] = new FoodicsInventoryItem_Task();
                 FoodicstaskInital[5] = new FoodicsdDiscounts_Task();
                 FoodicstaskInital[6] = new FoodicsModifierOptions_Task();
-                FoodicstaskInital[7] = new FoodicsCustomer_Task();
+               // FoodicstaskInital[7] = new FoodicsCustomer_Task();
 
 
                 foreach (Foodics_BaseIntegration ts in FoodicstaskInital)
@@ -249,7 +250,7 @@ namespace Foodics_NetSuite_Integeration
                 {
                     try
                     {
-                      // ts.Get(Subsidary);
+                       ts.Get(Subsidary);
                     }
                     catch (Exception ex)
                     {

@@ -60,8 +60,8 @@ namespace NetSuiteIntegeration.Tasks
                         Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj_info.Subsidiary_Id).FirstOrDefault();
 
                         AdjustBuildObject.tranDateSpecified = true;
-                        //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
-                        AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 01, 01), TimeZoneInfo.Local);
+                        AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
+                        //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 01, 01), TimeZoneInfo.Local);
                         //AdjustBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]), TimeZoneInfo.Local);
 
                         // adjustment account

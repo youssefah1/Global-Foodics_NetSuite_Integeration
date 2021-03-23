@@ -37,7 +37,6 @@ namespace NetSuiteIntegeration.Tasks
             new CustomDAO().GenerateAssemblyBuild();
 
             List<Foodics.NetSuite.Shared.Model.AssemblyBuild> lstitemsAll = new GenericeDAO<Foodics.NetSuite.Shared.Model.AssemblyBuild>().GetWhere(" item_id >0 and (Netsuite_Id IS NULL or Netsuite_Id =0)").Take(1000).ToList();
-            //for (int xx = 0; xx < 5; xx++)
             int Exe_length = 200;
             int lstend = Exe_length;
             if (lstitemsAll.Count > 0)
@@ -81,7 +80,8 @@ namespace NetSuiteIntegeration.Tasks
                                     AssemblyBuildObject.item = Mainitem;
 
                                     AssemblyBuildObject.tranDateSpecified = true;
-                                    AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 01, 01), TimeZoneInfo.Local);
+                                    AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
+                                    //AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 03, 15), TimeZoneInfo.Local);
                                     //AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]), TimeZoneInfo.Local);
 
                                     location = new RecordRef();

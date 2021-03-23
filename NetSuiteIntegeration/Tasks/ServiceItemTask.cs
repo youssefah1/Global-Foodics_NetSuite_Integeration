@@ -63,10 +63,10 @@ namespace NetSuiteIntegeration.Tasks
                     com.netsuite.webservices.ServiceSaleItem NewItemObject = new com.netsuite.webservices.ServiceSaleItem();
                     if (Obj.Netsuite_Id <= 0)
                     {
-                        NewItemObject.displayName = Obj.Display_Name_En;
+                        NewItemObject.displayName = Obj.Display_Name_En + " 3 ";
                         //NewItemObject.itemId = Obj.UPC_Code;
-                        NewItemObject.itemId = Obj.Display_Name_En;
-                        NewItemObject.salesDescription = Obj.Display_Name_En;
+                        NewItemObject.itemId = Obj.Display_Name_En + "3 ";
+                        NewItemObject.salesDescription = Obj.Display_Name_En + " 3 ";
                     }
                     //check if new or can be updated
                     if (Obj.Netsuite_Id > 0)

@@ -19,56 +19,60 @@ namespace NetSuiteIntegeration.Tasks
             try
             {
                 //List<Foodics.NetSuite.Shared.Model.Customer> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere("Netsuite_Id IS NULL or Netsuite_Id =0").Take(200).ToList();
-                List<Foodics.NetSuite.Shared.Model.Customer> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  (Foodics_UpdateDate >= '"+ ConfigurationManager.AppSettings["InvoiceDate"] + "')").Take(200).ToList();
-               
 
-                //if (objSetting == null)
-                //    return 0;
-                if (Lst_Items.Count <= 0)
-                    return 0;
-
-
-
-
-                com.netsuite.webservices.Customer[] ItemArr = new com.netsuite.webservices.Customer[Lst_Items.Count];
-                for (int i = 0; i < Lst_Items.Count; i++)
+                List<Foodics.NetSuite.Shared.Model.Customer> Lst_CustomAll = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  (Foodics_UpdateDate >= '"+ ConfigurationManager.AppSettings["InvoiceDate"] + "')").Take(2000).ToList();
+                int Exe_length = 200;
+                int lstend = Exe_length;
+                if (Lst_CustomAll.Count > 0)
                 {
-                    Foodics.NetSuite.Shared.Model.Customer Obj = Lst_Items[i];
-
-                    com.netsuite.webservices.Customer NewItemObject = new com.netsuite.webservices.Customer();
-                    string[] Fullname = Obj.name.Split(' ');
-                    if (Fullname.Length > 0)
-                        NewItemObject.firstName = Fullname[0];
-
-                    if (Fullname.Length > 1)
-                        NewItemObject.lastName = Obj.name.Remove(0, NewItemObject.firstName.Length);
-                    else
-                        NewItemObject.lastName = "--";
-
-
-                    NewItemObject.isPerson = true;
-                    NewItemObject.isPersonSpecified = true;
-                    NewItemObject.email = Obj.email;
-                    NewItemObject.phone = Obj.phone;
-
-                    RecordRef subsidiary = new RecordRef();
-                    subsidiary.internalId = Obj.Subsidiary_Id.ToString();
-                    subsidiary.type = RecordType.subsidiary;
-                    NewItemObject.subsidiary = subsidiary;
-
-                    if (Obj.InActive)
+                    for (int Index = 0; Index < Lst_CustomAll.Count; Index += Exe_length)
                     {
-                        NewItemObject.isInactive = true;
-                        NewItemObject.isInactiveSpecified = true;
+                        if (Index + Exe_length >= Lst_CustomAll.Count)
+                            lstend = Lst_CustomAll.Count - Index;
+                        List<Foodics.NetSuite.Shared.Model.Customer> Lst_Items = Lst_CustomAll.GetRange(Index, lstend);
+
+
+                        com.netsuite.webservices.Customer[] ItemArr = new com.netsuite.webservices.Customer[Lst_Items.Count];
+                        for (int i = 0; i < Lst_Items.Count; i++)
+                        {
+                            Foodics.NetSuite.Shared.Model.Customer Obj = Lst_Items[i];
+
+                            com.netsuite.webservices.Customer NewItemObject = new com.netsuite.webservices.Customer();
+                            string[] Fullname = Obj.name.Split(' ');
+                            if (Fullname.Length > 0)
+                                NewItemObject.firstName = Fullname[0];
+
+                            if (Fullname.Length > 1)
+                                NewItemObject.lastName = Obj.name.Remove(0, NewItemObject.firstName.Length);
+                            else
+                                NewItemObject.lastName = "--";
+
+
+                            NewItemObject.isPerson = true;
+                            NewItemObject.isPersonSpecified = true;
+                            NewItemObject.email = Obj.email;
+                            NewItemObject.phone = Obj.phone;
+
+                            RecordRef subsidiary = new RecordRef();
+                            subsidiary.internalId = Obj.Subsidiary_Id.ToString();
+                            subsidiary.type = RecordType.subsidiary;
+                            NewItemObject.subsidiary = subsidiary;
+
+                            if (Obj.InActive)
+                            {
+                                NewItemObject.isInactive = true;
+                                NewItemObject.isInactiveSpecified = true;
+                            }
+                            ItemArr[i] = NewItemObject;
+                        }
+                        // Send order list to netsuite
+                        WriteResponseList wr = Service(true).addList(ItemArr);
+                        bool result = wr.status.isSuccess;
+                        if (result)
+                        {
+                            UpdatedLst(Lst_Items, wr);
+                        }
                     }
-                    ItemArr[i] = NewItemObject;
-                }
-                // Send order list to netsuite
-                WriteResponseList wr = Service(true).addList(ItemArr);
-                bool result = wr.status.isSuccess;
-                if (result)
-                {
-                    UpdatedLst(Lst_Items, wr);
                 }
             }
             catch (Exception ex)

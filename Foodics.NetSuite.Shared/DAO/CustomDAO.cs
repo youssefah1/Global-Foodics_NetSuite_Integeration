@@ -31,7 +31,7 @@ namespace Foodics.NetSuite.Shared.DAO
 						 (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) = 0 and  ProductStatus =3)");
 
             //query.Append(" and Location_Id = 206 ");
-            query.Append(" and Invoice.[Date]>='2021-03-15' ");
+            query.Append(" and Invoice.[Date] < '2021-03-15' ");
 
             using (db)
             {
@@ -47,7 +47,7 @@ namespace Foodics.NetSuite.Shared.DAO
 						 where isnull(Invoice.Netsuite_Id,0)>0 and Invoice.Order_Status=" + Order_Status +
                      " and (PaymentMethodEntity.Netsuite_Id IS NULL or PaymentMethodEntity.Netsuite_Id =0) ";
 
-            query +=" and Invoice.[Date]>='2021-03-15' ";
+            query +=" and Invoice.[Date] < '2021-03-15' ";
             using (db)
             {
                 return db.Query<PaymentMethodEntity>(query).ToList();

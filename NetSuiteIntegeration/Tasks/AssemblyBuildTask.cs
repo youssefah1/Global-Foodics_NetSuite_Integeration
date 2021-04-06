@@ -80,8 +80,8 @@ namespace NetSuiteIntegeration.Tasks
                                     AssemblyBuildObject.item = Mainitem;
 
                                     AssemblyBuildObject.tranDateSpecified = true;
-                                    AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
-                                    //AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 03, 15), TimeZoneInfo.Local);
+                                    //AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now, TimeZoneInfo.Local);
+                                    AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 03, 01), TimeZoneInfo.Local);
                                     //AssemblyBuildObject.tranDate = TimeZoneInfo.ConvertTimeToUtc(Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]), TimeZoneInfo.Local);
 
                                     location = new RecordRef();

@@ -19,28 +19,26 @@ namespace FoodicsIntegeration.Tasks
         public override void Get(string Subsidiary)
         {
             int Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
-            object fromDateObj = new GenericeDAO<Invoice>().GetLatestModifiedDate(Subsidiary_Id, "CreateDate");
-            //string str = ((string)fromDateObj).ToString("yyyy-MM-dd");
-            DateTime fromDate = new DateTime();
-            if (fromDateObj == null)
-            {
-                //fromDate = Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]);
+            //object fromDateObj = new GenericeDAO<Invoice>().GetLatestModifiedDate(Subsidiary_Id, "CreateDate");
+            //DateTime fromDate = new DateTime();
+            //if (fromDateObj == null)
+            //{
+            //    fromDate = DateTime.Now;
+            //}
+            //else
+            //{
+            //    fromDate = (DateTime)fromDateObj;
+            //}
+            //fromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day).AddDays(-2);
+            //while (fromDate <= DateTime.Now)
+            //{
+            DateTime fromDate = Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]);
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
+            //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[updated_after]=" + fromDate.ToString("yyyy-MM-dd");
+            //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,combos.products.product,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[id]=f830395d-7db5-48dc-8082-5a53369db729";
+            string NextPage = MainURL;
 
-                fromDate = DateTime.Now;
-                //fromDate = new DateTime(2021, 3, 15);
-            }
-            else
-            {
-                fromDate = (DateTime)fromDateObj;
-            }
-            fromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day).AddDays(-2);
-            while (fromDate <= DateTime.Now)
-            {
-                string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[updated_after]=" + fromDate.ToString("yyyy-MM-dd");
-                //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,combos.products.product,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[id]=f830395d-7db5-48dc-8082-5a53369db729";
-                string NextPage = MainURL;
-
-                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
+                //LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
                 do
                 {
                     var client = new RestClient(NextPage);
@@ -92,8 +90,8 @@ namespace FoodicsIntegeration.Tasks
 
                 } while (!string.IsNullOrEmpty(NextPage));
 
-                fromDate = fromDate.AddDays(1);
-            }
+            //    fromDate = fromDate.AddDays(1);
+            //}
 
             new CustomDAO().InvoiceRelatedUpdate();
         }

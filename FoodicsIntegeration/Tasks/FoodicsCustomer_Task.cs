@@ -23,7 +23,7 @@ namespace FoodicsIntegeration.Tasks
             DateTime fromDate = new DateTime();
             if (fromDateObj == null)
             {
-                fromDate = DateTime.Now.AddDays(-15);
+                fromDate = new DateTime(2021, 02, 15);
             }
             else
             {

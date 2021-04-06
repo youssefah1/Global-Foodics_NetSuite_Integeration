@@ -18,16 +18,16 @@ namespace Foodics_NetSuite_Integeration
         {
             int TaskRunType = Utility.ConvertToInt(ConfigurationManager.AppSettings["TaskRunType"]);
 
-            string[] Subsidary = new string[1];
-            Subsidary[0] = "Overdose";
-            //string[] Subsidary = new string[2];
-           // Subsidary[0] = "Laviviane";
-            //Subsidary[1] = "Monroe";
+            //string[] Subsidary = new string[1];
+            //Subsidary[0] = "Overdose";
+            string[] Subsidary = new string[2];
+            Subsidary[0] = "Laviviane";
+            Subsidary[1] = "Monroe";
             foreach (string sub in Subsidary)
             {
                 LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " Start Running ", DateTime.Now.ToString());
-                //CustomFoodicsTaskCall(sub);
-                GenerateRunningTask(sub);
+               // CustomFoodicsTaskCall(sub);
+               // GenerateRunningTask(sub);
                 LogDAO.Integration_Exception(LogIntegrationType.Info, sub + " End Running ", DateTime.Now.ToString());
             }
 
@@ -40,7 +40,7 @@ namespace Foodics_NetSuite_Integeration
             //{
 
 
-                //CustomNetSuiteTaskCall();
+               CustomNetSuiteTaskCall();
 
 
             //}
@@ -60,12 +60,12 @@ namespace Foodics_NetSuite_Integeration
             //NetSuitetaskInitial[0] = new CustomerTask();
             // NetSuitetaskInitial[0] = new ItemTask();
             //NetSuitetaskInitial[0] = new PaymentMethodTask();
-             NetSuitetaskInitial[0] = new ProductTask();
+            // NetSuitetaskInitial[0] = new ProductTask();
             //            NetSuitetaskInitial[0] = new ServiceItemTask();
             //NetSuitetaskInitial[0] = new GiftTask();
             //NetSuitetaskInitial[0] = new DiscountTask();
 
-            //NetSuitetaskInitial[0] = new AssemblyBuildTask();
+            NetSuitetaskInitial[0] = new AssemblyBuildTask();
             //NetSuitetaskInitial[0] = new InvoiceTask();
             //NetSuitetaskInitial[0] = new InvoiceReturnTask();
             //NetSuitetaskInitial[3] = new AdjustmentBuildTask();
@@ -90,39 +90,21 @@ namespace Foodics_NetSuite_Integeration
         }
         private static void CustomFoodicsTaskCall(string Subsidary)
         {
-            Foodics_BaseIntegration[] FoodicstaskInital = new Foodics_BaseIntegration[1];
-            //FoodicstaskInital[0] = new FoodicsOrder_Task();
-            //FoodicstaskInital[1] = new FoodicsPaymentMethod_Task();
-            //FoodicstaskInital[0] = new FoodicsInventoryItem_Task();
-            FoodicstaskInital[0] = new Foodicsproducts_Task();
-            //FoodicstaskInital[2] = new FoodicsModifierOptions_Task();
-            foreach (Foodics_BaseIntegration ts in FoodicstaskInital)
+            Foodics_BaseIntegration[] FoodicstaskFinal = new Foodics_BaseIntegration[1];
+           // FoodicstaskFinal[0] = new FoodicsCustomer_Task();
+            FoodicstaskFinal[0] = new FoodicsOrder_Task();
+            
+            foreach (Foodics_BaseIntegration ts in FoodicstaskFinal)
             {
                 try
                 {
-                    ts.Get(Subsidary);
+                     ts.Get(Subsidary);
                 }
                 catch (Exception ex)
                 {
-                    LogDAO.Integration_Exception(LogIntegrationType.Error, "FoodicstaskInital Main Program Error", "Error " + ex.Message);
+                    LogDAO.Integration_Exception(LogIntegrationType.Error, "NetSuitetaskInitial Main Program Error", "Error " + ex.Message);
                 }
             }
-
-            //Foodics_BaseIntegration[] FoodicstaskFinal = new Foodics_BaseIntegration[1];
-            ////FoodicstaskFinal[0] = new Foodicsproducts_Task();
-            //FoodicstaskFinal[0] = new DiscountTask();
-
-            //foreach (Foodics_BaseIntegration ts in FoodicstaskFinal)
-            //{
-            //    try
-            //    {
-            //        ts.Get(Subsidary);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        LogDAO.Integration_Exception(LogIntegrationType.Error, "NetSuitetaskInitial Main Program Error", "Error " + ex.Message);
-            //    }
-            //}
 
         }
         private static void GenerateRunningTask(string Subsidary)
@@ -258,7 +240,7 @@ namespace Foodics_NetSuite_Integeration
                     }
                 }
                 NetSuiteBaseIntegration[] NetSuitetaskFinal = new NetSuiteBaseIntegration[4];
-                //NetSuitetaskFinal[0] = new AssemblyBuildTask();
+                NetSuitetaskFinal[0] = new AssemblyBuildTask();
                 NetSuitetaskFinal[0] = new InvoiceTask();
                 NetSuitetaskFinal[1] = new CustomerPaymentTask();
                 NetSuitetaskFinal[2] = new InvoiceReturnTask();

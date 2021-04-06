@@ -188,7 +188,7 @@ namespace Foodics.NetSuite.Shared.DAO
                             AND Invoice.Order_Status=4
                             AND InvoiceItem.ProductStatus=3
                             AND InvoiceItem.Item_Type='AssemblyItem'
-                            And [Date]>='2021-03-15'
+                           -- And [Date]>='2021-03-15'
 
                             INSERT INTO[dbo].[AssemblyBuild]
                                        (

@@ -18,9 +18,9 @@ namespace NetSuiteIntegeration.Tasks
         {
             try
             {
-                //List<Foodics.NetSuite.Shared.Model.Customer> Lst_Items = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere("Netsuite_Id IS NULL or Netsuite_Id =0").Take(200).ToList();
+                List<Foodics.NetSuite.Shared.Model.Customer> Lst_CustomAll = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere("Netsuite_Id IS NULL or Netsuite_Id =0").Take(200).ToList();
 
-                List<Foodics.NetSuite.Shared.Model.Customer> Lst_CustomAll = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  (Foodics_UpdateDate >= '"+ ConfigurationManager.AppSettings["InvoiceDate"] + "')").Take(2000).ToList();
+                //List<Foodics.NetSuite.Shared.Model.Customer> Lst_CustomAll = new GenericeDAO<Foodics.NetSuite.Shared.Model.Customer>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and  (Foodics_UpdateDate >= '"+ ConfigurationManager.AppSettings["InvoiceDate"] + "')").Take(2000).ToList();
                 int Exe_length = 200;
                 int lstend = Exe_length;
                 if (Lst_CustomAll.Count > 0)

@@ -151,8 +151,13 @@ namespace NetSuiteIntegeration.Tasks
                                     RecordRef payment_method = new RecordRef();
                                     payment_method.internalId = payobj.Payment_Method_Id.ToString();
                                     payment_method.type = RecordType.customerPayment;
-                                    cp.paymentMethod = payment_method;
-                                    cp.authCode = payobj.Ref;
+                                    if (objSetting.TaxApplied)
+                                    {
+                                        //doesn't work with monree & Lavivaiane
+                                        //cp.paymentMethod = payment_method;
+                                        //cp.authCode = payobj.Ref;
+                                    }
+                                    
 
                                     // amount
                                     cp.payment = payobj.Amount;

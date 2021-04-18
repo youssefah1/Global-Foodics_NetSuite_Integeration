@@ -54,7 +54,7 @@ namespace Foodics.NetSuite.Shared.Model
 	{
 		public Product Product { get; set; }
 		public decimal unit_price { get; set; }
-		public int quantity { get; set; }
+		public float quantity { get; set; }
 		public int discount_type { get; set; }
 		public int returned_quantity { get; set; }
 		public decimal discount_amount { get; set; }

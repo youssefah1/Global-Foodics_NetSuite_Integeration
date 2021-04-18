@@ -17,6 +17,7 @@ namespace Foodics.NetSuite.Shared.Model
         public string Item_Name { get; set; }
         public string Item_Type { get; set; }
         public float Quantity { get; set; }
+        public float FoodicsTax { get; set; }
         public string Units { get; set; }
         public int Price_Level_Id { get; set; }
         public float Amount { get; set; }

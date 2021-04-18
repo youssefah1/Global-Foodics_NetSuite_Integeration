@@ -33,9 +33,9 @@ namespace FoodicsIntegeration.Tasks
             //while (fromDate <= DateTime.Now)
             //{
             DateTime fromDate = Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]);
-            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
+           string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
             //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[updated_after]=" + fromDate.ToString("yyyy-MM-dd");
-            //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,combos.products.product,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[id]=f830395d-7db5-48dc-8082-5a53369db729";
+             //           string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,combos.products.product,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[id]=ed4a68d4-a278-4578-a1bc-5867778b61a8";
             string NextPage = MainURL;
 
                 //LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
@@ -184,7 +184,7 @@ namespace FoodicsIntegeration.Tasks
                         Netsuiteitem.Notes = Netsuiteitem.Interval_Note;
 
                         Netsuiteitem.Paid = (float)Foodicsitem.total_price;
-                        Netsuiteitem.Net_Payable = (float)Foodicsitem.total_price;
+                        Netsuiteitem.Net_Payable = (float)Foodicsitem.subtotal_price;
 
                         Netsuiteitem.BarCode = Foodicsitem.reference;
                         Netsuiteitem.Number = Foodicsitem.number.ToString();
@@ -264,20 +264,23 @@ namespace FoodicsIntegeration.Tasks
             Item itemobj = new Item();
             if (lstitemobj.Count > 0)
                 itemobj = lstitemobj.FirstOrDefault();
+
             InvoiceItem Netsuiteinvoiceitem = new InvoiceItem();
             Netsuiteinvoiceitem.Foodics_Id = Foodicsitem.id;
             Netsuiteinvoiceitem.FoodicsItem_Id = prodobj.Product.id;
-            if (itemobj != null && itemobj.Netsuite_Id > 0)
+            Netsuiteinvoiceitem.FoodicsTax = 0;
+            if (itemobj != null)// && itemobj.Netsuite_Id > 0)
             {
                 Netsuiteinvoiceitem.Item_Id = itemobj.Netsuite_Id;
                 Netsuiteinvoiceitem.Item_Type = ((Item_Type)itemobj.Item_Type).ToString();
+                if(!string.IsNullOrEmpty(itemobj.FoodicsTaxGroup_Id))
+                    Netsuiteinvoiceitem.FoodicsTax = 15;
             }
             else
                 Netsuiteinvoiceitem.Item_Id = 0;
+
             Netsuiteinvoiceitem.Item_Name = prodobj.Product.name;
             Netsuiteinvoiceitem.Item_Code = prodobj.Product.sku;
-
-
 
             Netsuiteinvoiceitem.Quantity = prodobj.quantity;
             Netsuiteinvoiceitem.Amount = (float)prodobj.unit_price;

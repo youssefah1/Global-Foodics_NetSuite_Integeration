@@ -88,6 +88,7 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
                     Netsuiteitem.Item_Type = (int)Item_Type.InventoryItem;
                     Netsuiteitem.Item_Type_Name = nameof(Item_Type.InventoryItem);
+                    Netsuiteitem.Foodics_Item_Type_Name = nameof(FoodicsItem_Type.InventoryItem);
                     Netsuiteitem.Name_Ar = Foodicsitem.name_localized;
                     Netsuiteitem.Name_En = Foodicsitem.name;
                     Netsuiteitem.Display_Name_Ar = Foodicsitem.name_localized;

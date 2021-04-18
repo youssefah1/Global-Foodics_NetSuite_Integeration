@@ -14,11 +14,11 @@ using System.Net;
 
 namespace FoodicsIntegeration.Tasks
 {
-    public class FoodicsModifierOptions_Task : Foodics_BaseIntegration
+    public class FoodicsModifierOption_Task : Foodics_BaseIntegration
     {
         public override void Get(string Subsidiary)
         {
-            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "modifier_options";
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "modifier_options?include=ingredients,modifier,tax_group";
             string NextPage = MainURL;
             do
             {
@@ -27,7 +27,7 @@ namespace FoodicsIntegeration.Tasks
                 var request = new RestRequest(Method.GET);
                 request.OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; };
                 request.AddHeader("Authorization", "Bearer " + ConfigurationManager.AppSettings[Subsidiary + "Foodics.Token"]);
-                var response = client.Execute<Dictionary<string, List<FoodicsModifierOptions>>>(request);
+                var response = client.Execute<Dictionary<string, List<FoodicsProduct>>>(request);
                 if (response.StatusCode == HttpStatusCode.OK && response.Data != null)
                 {
                     string content = response.Content;
@@ -69,7 +69,7 @@ namespace FoodicsIntegeration.Tasks
             } while (!string.IsNullOrEmpty(NextPage));
         }
 
-        private void Generate_Save_NetSuiteLst(List<FoodicsModifierOptions> lstitems, string Subsidiary)
+        private void Generate_Save_NetSuiteLst(List<FoodicsProduct> lstitems, string Subsidiary)
         {
             try
             {
@@ -81,24 +81,69 @@ namespace FoodicsIntegeration.Tasks
                     Item itemobj = new GenericeDAO<Item>().GetByFoodicsId(Foodicsitem.id);
                     //barcode
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
-                    Netsuiteitem.Item_Type = (int)Item_Type.ServiceSaleItem;
-                    Netsuiteitem.Item_Type_Name = nameof(Item_Type.ServiceSaleItem);
+                    Netsuiteitem.Item_Type = (int)Item_Type.AssemblyItem;
+                    Netsuiteitem.Item_Type_Name = nameof(Item_Type.AssemblyItem);
+                    Netsuiteitem.Foodics_Item_Type_Name = nameof(FoodicsItem_Type.ModifierOption);
                     Netsuiteitem.Name_Ar = Foodicsitem.name_localized;
                     Netsuiteitem.Name_En = Foodicsitem.name;
                     Netsuiteitem.Display_Name_Ar = Foodicsitem.name_localized;
                     Netsuiteitem.Display_Name_En = Foodicsitem.name;
                     Netsuiteitem.InActive = Foodicsitem.deleted_at.Year == 1 ? false : true;
                     Netsuiteitem.UPC_Code = Foodicsitem.sku;
+                    Netsuiteitem.Img = Foodicsitem.image;
                     Netsuiteitem.Price = (double)Foodicsitem.price;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
                     Netsuiteitem.FoodicsUpdateDate = Foodicsitem.updated_at;
+                    if (Foodicsitem.tax_group != null && !string.IsNullOrEmpty(Foodicsitem.tax_group.id))
+                    {
+                        Netsuiteitem.FoodicsTaxGroup_Id = Foodicsitem.tax_group.id;
+                    }
+                    if (Foodicsitem.modifier != null && !string.IsNullOrEmpty(Foodicsitem.modifier.id))
+                    {
+                        Netsuiteitem.FoodicsCategory_Id = Foodicsitem.modifier.id;
+                        Categories.FoodicsCategories obj = new GenericeDAO<Categories.FoodicsCategories>().GetByFoodicsId(Foodicsitem.modifier.id);
+                        if (obj != null && obj.Netsuite_Id > 0)
+                            Netsuiteitem.Category_Id = obj.Netsuite_Id;
+                    }
+                    foreach (var ingredientsobj in Foodicsitem.ingredients)
+                    {
+                        Item itemcomponent = new GenericeDAO<Item>().GetByFoodicsId(ingredientsobj.id);
+                        if (itemcomponent != null)//&& itemcomponent.Netsuite_Id > 0)
+                        {
+                            ItemCompnent objitmcom = new ItemCompnent();
+                            objitmcom.UnitId = 0;//Utility.ConvertToInt(itemobj.memberUnit);
+                            objitmcom.UnitName = ingredientsobj.ingredient_unit;
+                            objitmcom.Quantity = ingredientsobj.pivot.quantity;
+                            if (itemcomponent.Netsuite_Id > 0)
+                                objitmcom.ComponentId = itemcomponent.Netsuite_Id;
+                            else
+                                objitmcom.ComponentId = 0;
+                            objitmcom.ItemFoodics_Id = Foodicsitem.id;
+                            objitmcom.ComponentFoodics_Id = ingredientsobj.id;
+
+                            if (itemobj != null && itemobj.Netsuite_Id > 0)
+                                objitmcom.ItemId = itemobj.Netsuite_Id;
+                            else
+                                objitmcom.ItemId = 0;//Utility.ConvertToInt(Assitem.internalId);
+
+                            ItemCompnentList.Add(objitmcom);
+                        }
+                    }
 
                     NetSuitelst.Add(Netsuiteitem);
 
                 }
 
                 new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst);
+                new GenericeDAO<ItemCompnent>().ItemcompnentFoodicsIntegration(ItemCompnentList);
+                //string Itemids = "'";
+                //Itemids += string.Join("','", NetSuitelst.Select(x => x.Foodics_Id).Distinct().ToArray());
+                //Itemids += "'";
+                //new CustomDAO().DeleteFoodicsItemsComponent(Itemids);
+                //new GenericeDAO<ItemCompnent>().ListInsertOnly(ItemCompnentList);
+                //new CustomDAO().UpdateCompnentitemID();
 
+                //return NetSuitelst;
             }
             catch (Exception ex)
             {

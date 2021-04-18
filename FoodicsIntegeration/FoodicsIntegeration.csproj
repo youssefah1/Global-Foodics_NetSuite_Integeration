@@ -171,6 +171,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\FoodicsInventoryCategories_task.cs" />
+    <Compile Include="Tasks\FoodicsModifiers_task.cs" />
     <Compile Include="Tasks\FoodicsProductCategories_task.cs" />
     <Compile Include="Tasks\FoodicsCustomer_Task.cs" />
     <Compile Include="Tasks\FoodicsdDiscounts_Task.cs" />
@@ -179,7 +180,8 @@
     <Compile Include="Tasks\FoodicsPaymentMethod_Task.cs" />
     <Compile Include="Tasks\FoodicsCombo_Task.cs" />
     <Compile Include="Tasks\FoodicsGiftCardProduct_Task.cs" />
-    <Compile Include="Tasks\FoodicsModifierOptions_Task.cs" />
+    <Compile Include="Tasks\FoodicsModifierOptionsService_Task.cs" />
+    <Compile Include="Tasks\FoodicsModifierOption_Task.cs" />
     <Compile Include="Tasks\Foodicsproducts_Task.cs" />
     <Compile Include="Tasks\FoodicsInventoryItem_Task.cs" />
     <Compile Include="Tasks\FoodicsBranche_Task.cs" />

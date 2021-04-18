@@ -9,6 +9,8 @@ namespace Foodics.NetSuite.Shared.Model
 		public int Parent_Netsuite_Id { get; set; }
 		public int Item_Type { get; set; }
 		public string Item_Type_Name { get; set; }
+		public string Foodics_Item_Type_Name { get; set; }
+		public string FoodicsTaxGroup_Id { get; set; }
 		public string FoodicsCategory_Id { get; set; }
 		public int Category_Id { get; set; }
 		public string Name_En { get; set; }
@@ -36,6 +38,7 @@ namespace Foodics.NetSuite.Shared.Model
 		public bool Show_Shortcut { get; set; }
 		public string Matrix_Type { get; set; }
 		public bool InActive { get; set; }
+		
 		//public DateTime UpdateDate { get; set; }
 		//public DateTime CreateDate { get; set; }
 		public int Days_Before_Expiration { get; set; }

@@ -30,8 +30,8 @@ namespace Foodics.NetSuite.Shared.DAO
                 query.Append(@"  and Invoice.Id  not in 
 						 (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) = 0 and  ProductStatus =3)");
 
-            //query.Append(" and Location_Id = 206 ");
-            query.Append(" and Invoice.[Date] < '2021-03-15' ");
+           // query.Append(" and id = 356 ");
+            //query.Append(" and Invoice.[Date] < '2021-03-15' ");
 
             using (db)
             {
@@ -47,7 +47,7 @@ namespace Foodics.NetSuite.Shared.DAO
 						 where isnull(Invoice.Netsuite_Id,0)>0 and Invoice.Order_Status=" + Order_Status +
                      " and (PaymentMethodEntity.Netsuite_Id IS NULL or PaymentMethodEntity.Netsuite_Id =0) ";
 
-            query +=" and Invoice.[Date] < '2021-03-15' ";
+            //query +=" and Invoice.[Date] < '2021-03-15' ";
             using (db)
             {
                 return db.Query<PaymentMethodEntity>(query).ToList();
@@ -64,7 +64,7 @@ namespace Foodics.NetSuite.Shared.DAO
                             AND Invoice.Order_Status=5
                             AND InvoiceItem.ProductStatus=6
                             AND InvoiceItem.Item_Type='AssemblyItem'
-                            and Invoice.[Date]>='2021-03-15'
+                           -- and Invoice.[Date]>='2021-03-15'
 
                             INSERT INTO [dbo].[AdjustmentBuild]
                                        (
@@ -188,6 +188,7 @@ namespace Foodics.NetSuite.Shared.DAO
                             AND Invoice.Order_Status=4
                             AND InvoiceItem.ProductStatus=3
                             AND InvoiceItem.Item_Type='AssemblyItem'
+                            and InvoiceItem.Quantity >0
                            -- And [Date]>='2021-03-15'
 
                             INSERT INTO[dbo].[AssemblyBuild]

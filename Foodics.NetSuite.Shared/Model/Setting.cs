@@ -15,7 +15,8 @@ namespace Foodics.NetSuite.Shared.Model
         
             public int OtherChargeItem_Netsuite_Id { get; set; }
         public int TaxCode_Netsuite_Id { get; set; }
-
+        public int TaxCode_Free_Netsuite_Id { get; set; }
+        
         public int Item_Tmp_Netsuite_Id { get; set; }
 
         public int LiabilityAccount_Netsuite_Id { get; set; }
@@ -28,6 +29,7 @@ namespace Foodics.NetSuite.Shared.Model
         public int Location_Netsuite_Id { get; set; }
         public int TaxSchedule_Netsuite_Id { get; set; }
         public bool InActive { get; set; }
+        public bool TaxApplied { get; set; }
         public int DiscountAccount_Netsuite_Id { get; set; }
         public int DiscountItem_Netsuite_Id { get; set; }
         public int IncomeAccount_Netsuite_Id { get; set; }

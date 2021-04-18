@@ -18,6 +18,14 @@ namespace Foodics.NetSuite.Shared
         ServiceSaleItem = 5
 
     }
+    public enum FoodicsItem_Type
+    {
+        InventoryItem = 1, 
+        Product = 2, 
+        ModifierOption = 3,
+        
+
+    }
     public enum LogIntegrationType
     {
         Error = 1,

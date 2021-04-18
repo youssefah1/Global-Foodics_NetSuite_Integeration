@@ -88,9 +88,9 @@ namespace NetSuiteIntegeration.Tasks
 
                     if (Obj.Netsuite_Id <= 0)
                     {
-                        NewItemObject.displayName = Obj.Display_Name_En + " 3 ";
+                        NewItemObject.displayName = Obj.Display_Name_En;
                         //NewItemObject.itemId = Obj.UPC_Code;
-                        NewItemObject.itemId = Obj.Display_Name_En + " 3 ";
+                        NewItemObject.itemId = Obj.Display_Name_En;
                     }
                     RecordRef classref = new RecordRef();
                     classref.internalId = Obj.Category_Id.ToString();

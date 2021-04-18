@@ -30,7 +30,8 @@ namespace Foodics.NetSuite.Shared.Model
         public DateTime deleted_at { get; set; }
         public string id { get; set; }
         public category category { get; set; }
-
+        public tax_group tax_group { get; set; }
+        public modifier modifier { get; set; }
         public List<ingredients> ingredients { get; set; }
 
 
@@ -43,6 +44,18 @@ namespace Foodics.NetSuite.Shared.Model
 
     }
 
+    public class modifier
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+
+    }
+    public class tax_group
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+
+    }
     public class ingredients
     {
         public string id { get; set; }

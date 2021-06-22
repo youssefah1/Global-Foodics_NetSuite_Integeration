@@ -14,11 +14,11 @@ using System.Net;
 
 namespace FoodicsIntegeration.Tasks
 {
-    public class FoodicsInventoryItem_Task : Foodics_BaseIntegration
+    public class FoodicsOtherChargetem_Task : Foodics_BaseIntegration
     {
         public override void Get(string Subsidiary)
         {
-            string MainURL = ConfigurationManager.AppSettings[Subsidiary+"Foodics.ResetURL"] + "inventory_items?include=category&filter[updated_after]=2021-01-01";
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary+"Foodics.ResetURL"] + "charges";
             string NextPage = MainURL;
             do
             {
@@ -27,8 +27,7 @@ namespace FoodicsIntegeration.Tasks
                 var request = new RestRequest(Method.GET);
                 request.OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; };
                 request.AddHeader("Authorization", "Bearer " + ConfigurationManager.AppSettings[Subsidiary+"Foodics.Token"]);
-                List<FoodicsInventoryItem> lstitems = new List<FoodicsInventoryItem>();
-                var response = client.Execute<Dictionary<string, List<FoodicsInventoryItem>>>(request);
+                var response = client.Execute<Dictionary<string, List<FoodicsOtherChargeItem>>>(request);
                 if (response.StatusCode == HttpStatusCode.OK && response.Data != null)
                 {
                     string content = response.Content;
@@ -73,7 +72,7 @@ namespace FoodicsIntegeration.Tasks
             } while (!string.IsNullOrEmpty(NextPage));
         }
 
-        private void Generate_Save_NetSuiteLst(List<FoodicsInventoryItem> lstitems,string Subsidiary)
+        private void Generate_Save_NetSuiteLst(List<FoodicsOtherChargeItem> lstitems,string Subsidiary)
         {
             try
             {
@@ -82,45 +81,17 @@ namespace FoodicsIntegeration.Tasks
                 {
                     Item Netsuiteitem = new Item();
                     Netsuiteitem.Foodics_Id = Foodicsitem.id;
-                    Netsuiteitem.Item_Type = (int)Item_Type.InventoryItem;
-                    Netsuiteitem.Item_Type_Name = nameof(Item_Type.InventoryItem);
-                    Netsuiteitem.Foodics_Item_Type_Name = nameof(FoodicsItem_Type.InventoryItem);
+                    Netsuiteitem.Item_Type = (int)Item_Type.OtherChargeSaleItem;
+                    Netsuiteitem.Item_Type_Name = nameof(Item_Type.OtherChargeSaleItem);
+                    Netsuiteitem.Foodics_Item_Type_Name = nameof(Item_Type.OtherChargeSaleItem);
                     Netsuiteitem.Name_Ar = Foodicsitem.name_localized;
                     Netsuiteitem.Name_En = Foodicsitem.name;
                     Netsuiteitem.Display_Name_Ar = Foodicsitem.name_localized;
                     Netsuiteitem.Display_Name_En = Foodicsitem.name;
-                    Netsuiteitem.InActive = Foodicsitem.deleted_at != null ? true : false;
-                    Netsuiteitem.UPC_Code = Foodicsitem.sku;
-                    Netsuiteitem.Storage_Unit = Foodicsitem.storage_unit;
-                    Netsuiteitem.Ingredient_Unit = Foodicsitem.ingredient_unit;
-                    Netsuiteitem.storage_to_ingredient_factor = Foodicsitem.storage_to_ingredient_factor;
+                    Netsuiteitem.InActive = Foodicsitem.deleted_at.Year == 1 ? false : true;
                     Netsuiteitem.FoodicsUpdateDate = Foodicsitem.updated_at;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
-                    if (Foodicsitem.category != null && !string.IsNullOrEmpty(Foodicsitem.category.id))
-                    {
-                        Netsuiteitem.FoodicsCategory_Id = Foodicsitem.category.id;
-                        Categories.FoodicsCategories obj = new GenericeDAO<Categories.FoodicsCategories>().GetByFoodicsId(Foodicsitem.category.id);
-                        Netsuiteitem.Category_Id = obj.Netsuite_Id;
-                    }
-                   
-                    int UnitsOfMeasure_Id = 0;
-                        if (!string.IsNullOrEmpty(Netsuiteitem.Ingredient_Unit))
-                            UnitsOfMeasure_Id = new CustomDAO().Check_Create_unitName(Netsuiteitem.Ingredient_Unit);
-
-                        if (UnitsOfMeasure_Id > 0 && Netsuiteitem.Storage_Unit.ToLower() != Netsuiteitem.Ingredient_Unit.ToLower())
-                        {
-                            UnitsOfMeasureIngredient obj = new UnitsOfMeasureIngredient();
-                            obj.Storage_To_Ingredient_Value = Netsuiteitem.storage_to_ingredient_factor;
-                            obj.unitName = Netsuiteitem.Storage_Unit;
-                            obj.UnitsOfMeasure_Id = UnitsOfMeasure_Id;
-
-                            new CustomDAO().Check_Create_unitName_ingredient(obj);
-                        }
-                        else if (!string.IsNullOrEmpty(Netsuiteitem.Storage_Unit) && Netsuiteitem.Storage_Unit.ToLower() != Netsuiteitem.Ingredient_Unit.ToLower())
-                        {
-                            new CustomDAO().Check_Create_unitName(Netsuiteitem.Storage_Unit);
-                        }
-                    Netsuiteitem.Price = Utility.ConvertToDouble(Foodicsitem.cost);
+                    Netsuiteitem.Price = Utility.ConvertToDouble(Foodicsitem.value);
 
                     NetSuitelst.Add(Netsuiteitem);
                 }

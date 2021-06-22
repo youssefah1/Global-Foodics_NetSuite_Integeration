@@ -109,7 +109,6 @@ namespace NetSuiteIntegeration.Tasks
                                         int arr = 0;
                                         for (int k = 0; k < totalItems; k++)
                                         {
-
                                             itemDetails = itemLst[arr];
                                             invoiceItemObject = CreateInvoiceItem(objSetting, itemDetails);
                                             invoiceItems[k] = invoiceItemObject;
@@ -118,7 +117,7 @@ namespace NetSuiteIntegeration.Tasks
                                                 float Discount = itemDetails.Line_Discount_Amount;
                                                 k++;
                                                 Foodics.NetSuite.Shared.Model.InvoiceItem OtherCharge = new Foodics.NetSuite.Shared.Model.InvoiceItem();
-                                                OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id; //1211;
+                                                OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id; 
                                                 OtherCharge.Amount = Discount * -1;
                                                 OtherCharge.Quantity = 1;
                                                 OtherCharge.Item_Type = "OtherChargeResaleItem";
@@ -225,7 +224,7 @@ namespace NetSuiteIntegeration.Tasks
 
                                     CreatedBy = new StringCustomFieldRef();
                                     CreatedBy.scriptId = "custbody_da_foodics_createdby";
-                                    CreatedBy.value = invoice_info.CreatedBy != null? invoice_info.CreatedBy.ToString():"";
+                                    CreatedBy.value = invoice_info.CreatedBy != null ? invoice_info.CreatedBy.ToString() : "";
 
                                     Source = new StringCustomFieldRef();
                                     Source.scriptId = "custbody_da_foodics_source";
@@ -276,9 +275,10 @@ namespace NetSuiteIntegeration.Tasks
             RecordRef taxCode, item, unit, price;
             InvoiceItem invoiceItemObject = new InvoiceItem();
             taxCode = new RecordRef();
-            taxCode.internalId = itemDetails.FoodicsTax>0? objSetting.TaxCode_Netsuite_Id.ToString(): objSetting.TaxCode_Free_Netsuite_Id.ToString();
+            taxCode.internalId = itemDetails.FoodicsTax > 0 ? objSetting.TaxCode_Netsuite_Id.ToString() : objSetting.TaxCode_Free_Netsuite_Id.ToString();
             taxCode.type = RecordType.taxAcct;
-            invoiceItemObject.taxCode = taxCode;
+            if (int.Parse(taxCode.internalId) > 0)
+                invoiceItemObject.taxCode = taxCode;
             // item
             item = new RecordRef();
             item.internalId = itemDetails.Item_Id.ToString();
@@ -298,10 +298,29 @@ namespace NetSuiteIntegeration.Tasks
             price.internalId = "-1";
             invoiceItemObject.price = price;
 
-            if (objSetting.TaxApplied)
-                invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
+            //if (itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+            //{
+            //if (itemDetails.FoodicsTax > 0)
+            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
+            //else
+            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+            //}
+            //else
+            //{
+            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+            //}
+            //old code
+            if (itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+            {
+                if (objSetting.TaxApplied && itemDetails.FoodicsTax > 0)
+                    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
+                else
+                    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+            }
             else
+            {
                 invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+            }
             #endregion
             invoiceItemObject.quantitySpecified = true;
             invoiceItemObject.quantity = itemDetails.Quantity;

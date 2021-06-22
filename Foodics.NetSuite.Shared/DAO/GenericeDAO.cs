@@ -407,7 +407,7 @@ namespace Foodics.NetSuite.Shared.DAO
             }
         }
 
-        public void FoodicsIntegration(List<T> list)
+        public void FoodicsIntegration(List<T> list,bool SetUpdateDate = true)
         {
             string tableName = "";
             if (typeof(T).DeclaringType != null)
@@ -447,11 +447,18 @@ namespace Foodics.NetSuite.Shared.DAO
                     foreach (var pro in proList)
                         if (pro.Name.ToLower() != "id" && pro.Name != "Netsuite_Id")
                             query.Append(" " + pro.Name + ", ");
-                    query.Append("  [UpdateDate],[CreateDate]) VALUES ( ");
+                    if (SetUpdateDate)
+                        query.Append("  [UpdateDate],[CreateDate]) VALUES ( ");
+                    else
+                        query.Append("  [CreateDate]) VALUES ( ");
+                    
                     foreach (var pro in proList)
                         if (pro.Name.ToLower() != "id" && pro.Name != "Netsuite_Id")
                             query.Append(" " + Utility.GetColumnValue(obj, pro.Name) + ", ");
-                    query.Append(" GETDATE(),GETDATE()) END ");
+                    if (SetUpdateDate)
+                        query.Append(" GETDATE(),GETDATE()) END ");
+                    else
+                        query.Append(" GETDATE()) END ");
                 }
                 catch (Exception ex)
                 {

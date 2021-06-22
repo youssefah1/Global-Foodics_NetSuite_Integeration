@@ -1,36 +1,32 @@
-﻿using NetSuiteIntegeration.com.netsuite.webservices;
+﻿using Foodics.NetSuite.Shared;
+using Foodics.NetSuite.Shared.DAO;
+using Foodics.NetSuite.Shared.Model;
+using NetSuiteIntegeration.com.netsuite.webservices;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Foodics.NetSuite.Shared.DAO;
-
-
-using Foodics.NetSuite.Shared.Model;
 using System.Data;
-using Foodics.NetSuite.Shared;
+using System.Linq;
 
 namespace NetSuiteIntegeration.Tasks
 {
-    public class ServiceItemTask : NetSuiteBaseIntegration
+    public class ChargeItemTask : NetSuiteBaseIntegration
     {
         public override Int64 Set(string parametersArr)
         {
 
 
 
-            List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere("(Netsuite_Id IS NULL or Netsuite_Id =0) and inactive=0 and  Item_Type=" + (int)Item_Type.ServiceSaleItem).Take(200).ToList();
-            //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id>=1200 and inactive=0 and Item_Type=" + (int)Item_Type.Service).Take(100).ToList();
+            List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" isnull(Netsuite_Id,0)=0 and inactive=0 and  Item_Type=" + (int)Item_Type.OtherChargeSaleItem).Take(100).ToList();
 
             List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
             List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
 
             if (Lst_ItemsAll.Count <= 0)
                 return 0;
-
             // Send order list to netsuite
             if (Lst_ItemsNew.Count > 0)
             {
-                com.netsuite.webservices.ServiceSaleItem[] ItemArrNew = GenerateNetSuitelst(Lst_ItemsNew);
+                com.netsuite.webservices.OtherChargeSaleItem[] ItemArrNew = GenerateNetSuitelst(Lst_ItemsNew);
                 WriteResponseList wrNew = Service(true).addList(ItemArrNew);
                 bool result = wrNew.status.isSuccess;
                 if (result)
@@ -42,16 +38,16 @@ namespace NetSuiteIntegeration.Tasks
 
             if (Lst_ItemsUpdate.Count > 0)
             {
-                com.netsuite.webservices.ServiceSaleItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
+                com.netsuite.webservices.OtherChargeSaleItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
                 // Send order list to netsuite
                 WriteResponseList wr = Service(true).updateList(ItemArrAdd);
             }
 
             return 0;
         }
-        public com.netsuite.webservices.ServiceSaleItem[] GenerateNetSuitelst(List<Item> Lst_ItemsAll)
+        public com.netsuite.webservices.OtherChargeSaleItem[] GenerateNetSuitelst(List<Item> Lst_ItemsAll)
         {
-            com.netsuite.webservices.ServiceSaleItem[] ItemArr = new com.netsuite.webservices.ServiceSaleItem[Lst_ItemsAll.Count];
+            com.netsuite.webservices.OtherChargeSaleItem[] ItemArr = new com.netsuite.webservices.OtherChargeSaleItem[Lst_ItemsAll.Count];
             try
             {
                 for (int i = 0; i < Lst_ItemsAll.Count; i++)
@@ -60,11 +56,10 @@ namespace NetSuiteIntegeration.Tasks
                     Item Obj = Lst_ItemsAll[i];
                     Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj.Subsidiary_Id).FirstOrDefault();
                     Categories.CategoriesAccounts objCatAccount = new Categories.CategoriesAccounts();
-                    com.netsuite.webservices.ServiceSaleItem NewItemObject = new com.netsuite.webservices.ServiceSaleItem();
+                    com.netsuite.webservices.OtherChargeSaleItem NewItemObject = new com.netsuite.webservices.OtherChargeSaleItem();
                     if (Obj.Netsuite_Id <= 0)
                     {
                         NewItemObject.displayName = Obj.Display_Name_En;
-                        //NewItemObject.itemId = Obj.UPC_Code;
                         NewItemObject.itemId = Obj.Display_Name_En;
                         NewItemObject.salesDescription = Obj.Display_Name_En;
                     }
@@ -91,14 +86,7 @@ namespace NetSuiteIntegeration.Tasks
                     IncomAccountref.type = RecordType.account;
                     NewItemObject.incomeAccount = IncomAccountref;
 
-                    IncomAccountref.internalId = objSetting.IncomeAccount_Netsuite_Id.ToString();
-
-
-
-
-
-
-
+                    IncomAccountref.internalId = objSetting.OtherChargeItem_Netsuite_Id.ToString();
                     #endregion
                     RecordRef Tax_Schedule = new RecordRef();
                     Tax_Schedule.internalId = objSetting.TaxSchedule_Netsuite_Id.ToString();

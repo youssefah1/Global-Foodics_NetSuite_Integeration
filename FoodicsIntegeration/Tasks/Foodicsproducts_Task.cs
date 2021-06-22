@@ -134,7 +134,7 @@ namespace FoodicsIntegeration.Tasks
 
                 }
 
-                new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst);
+                new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst,false);
                 new GenericeDAO<ItemCompnent>().ItemcompnentFoodicsIntegration(ItemCompnentList);
             }
             catch (Exception ex)

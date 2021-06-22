@@ -30,18 +30,18 @@ namespace FoodicsIntegeration.Tasks
             //    fromDate = (DateTime)fromDateObj;
             //}
             //fromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day).AddDays(-2);
+            DateTime fromDate = Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]);
             //while (fromDate <= DateTime.Now)
             //{
-            DateTime fromDate = Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]);
-           string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
-            //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[updated_after]=" + fromDate.ToString("yyyy-MM-dd");
-             //           string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,customer,branch,creator,discount,combos.combo_size.combo,combos.products,combos.products.product,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method" + "&filter[id]=ed4a68d4-a278-4578-a1bc-5867778b61a8";
+                
+           string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,charges.charge,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
+           //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,charges.charge,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[id]=c466f0aa-fb33-43ae-90bd-273215bbd83d";
             string NextPage = MainURL;
 
-                //LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
-                do
-                {
-                    var client = new RestClient(NextPage);
+            //LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
+            do
+            {
+                var client = new RestClient(NextPage);
                     //client.Timeout = -1;
                     client.Timeout = 200000;
                     var request = new RestRequest(Method.GET);
@@ -88,9 +88,9 @@ namespace FoodicsIntegeration.Tasks
                     }
 
 
-                } while (!string.IsNullOrEmpty(NextPage));
+            } while (!string.IsNullOrEmpty(NextPage));
 
-            //    fromDate = fromDate.AddDays(1);
+            //    //fromDate = fromDate.AddDays(1);
             //}
 
             new CustomDAO().InvoiceRelatedUpdate();
@@ -191,25 +191,35 @@ namespace FoodicsIntegeration.Tasks
                         //Products
                         foreach (var prodobj in Foodicsitem.Products)
                         {
-                            //if (prodobj.status == 3)//3 is delivered
-                            //{
                             GetProducts(InvoiceItemlst, Foodicsitem, prodobj, "", "");
-
-
-                            //}
                         }
                         if (Foodicsitem.combos != null)
                         {
                             foreach (var Comboobj in Foodicsitem.combos)
                             {
-                                //if (prodobj.status == 3)//3 is delivered
-                                //{
                                 foreach (var prodobj in Comboobj.Products)
                                 {
                                     GetProducts(InvoiceItemlst, Foodicsitem, prodobj, Comboobj.combo_size.name, Comboobj.combo_size.combo.name);
                                 }
+                            }
+                        }
 
-                                //}
+                        if (Foodicsitem.charges != null)
+                        {
+                            foreach (var objCharges in Foodicsitem.charges)
+                            {
+                                Product objproduct = new Product();
+                                Products objProds = new Products();
+                                objProds.quantity = 1;
+                                objProds.unit_price = objCharges.amount;
+                                objProds.Product = objproduct;
+                                objProds.status = 3;
+                                foreach (var objCharge in objCharges.charge)
+                                {
+                                    objproduct.id = objCharge.id;
+                                    objproduct.name = objCharge.name;
+                                    GetProducts(InvoiceItemlst, Foodicsitem, objProds, "","" );
+                                }
                             }
                         }
                         //payment methods

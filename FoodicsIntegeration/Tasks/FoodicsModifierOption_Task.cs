@@ -14,7 +14,7 @@ using System.Net;
 
 namespace FoodicsIntegeration.Tasks
 {
-    public class FoodicsModifierOption_Task : Foodics_BaseIntegration
+    public class FoodicsModifierOptionProduct_Task : Foodics_BaseIntegration
     {
         public override void Get(string Subsidiary)
         {
@@ -134,7 +134,7 @@ namespace FoodicsIntegeration.Tasks
 
                 }
 
-                new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst);
+                new GenericeDAO<Item>().FoodicsIntegration(NetSuitelst,false);
                 new GenericeDAO<ItemCompnent>().ItemcompnentFoodicsIntegration(ItemCompnentList);
                 //string Itemids = "'";
                 //Itemids += string.Join("','", NetSuitelst.Select(x => x.Foodics_Id).Distinct().ToArray());

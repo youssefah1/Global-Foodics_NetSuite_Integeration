@@ -13,11 +13,11 @@ namespace NetSuiteIntegeration.Tasks
 {
     public class CustomerPaymentTask : NetSuiteBaseIntegration
     {
-      
+
         public override Int64 Set(string parametersArr)
         {
 
-            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> lstitemsAll = new CustomDAO().SelectCustomerPayment(4);
+            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> lstitemsAll = new CustomDAO().SelectCustomerPayment(4).Take(1).ToList();
             int Exe_length = 200;
             int lstend = Exe_length;
             if (lstitemsAll.Count > 0)
@@ -148,16 +148,12 @@ namespace NetSuiteIntegeration.Tasks
                                     is_valid = true;
 
                                     // payment method
-                                    RecordRef payment_method = new RecordRef();
-                                    payment_method.internalId = payobj.Payment_Method_Id.ToString();
-                                    payment_method.type = RecordType.customerPayment;
-                                    if (objSetting.TaxApplied)
-                                    {
-                                        //doesn't work with monree & Lavivaiane
-                                        //cp.paymentMethod = payment_method;
-                                        //cp.authCode = payobj.Ref;
-                                    }
-                                    
+                                    //RecordRef payment_method = new RecordRef();
+                                    //payment_method.internalId = payobj.Payment_Method_Id.ToString();
+                                    //payment_method.type = RecordType.customerPayment;
+                                    //cp.paymentMethod = payment_method;
+                                    //cp.authCode = payobj.Ref;
+
 
                                     // amount
                                     cp.payment = payobj.Amount;

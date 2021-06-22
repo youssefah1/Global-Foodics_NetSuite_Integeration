@@ -76,6 +76,7 @@
     <Compile Include="Model\CreditMemo.cs" />
     <Compile Include="Model\Discount.cs" />
     <Compile Include="Model\FoodicsDiscount.cs" />
+    <Compile Include="Model\FoodicsOtherChargeItem.cs" />
     <Compile Include="Model\FoodicsModifierOptions.cs" />
     <Compile Include="Model\ItemCompnent.cs" />
     <Compile Include="Model\Categories.cs" />

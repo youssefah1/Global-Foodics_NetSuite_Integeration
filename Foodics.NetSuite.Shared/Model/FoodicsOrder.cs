@@ -46,6 +46,7 @@ namespace Foodics.NetSuite.Shared.Model
 		public discount discount { get; set; }
 		public creator creator { get; set; }
 		public List<combos> combos { get; set; }
+		public List<charges> charges { get; set; }
 
 	}
 
@@ -78,6 +79,19 @@ namespace Foodics.NetSuite.Shared.Model
 		public combo_size combo_size { get; set; }
 
 		
+
+	}
+	public class charges
+	{
+		public decimal amount { get; set; }
+		public List<charge> charge { get; set; }
+
+	}
+	public class charge
+	{
+
+		public string id { get; set; }
+		public string name { get; set; }
 
 	}
 	public class combo_size

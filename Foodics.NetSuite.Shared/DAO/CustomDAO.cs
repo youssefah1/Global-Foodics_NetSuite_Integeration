@@ -17,7 +17,7 @@ namespace Foodics.NetSuite.Shared.DAO
         {
             StringBuilder query = new StringBuilder();
             //ProductStatus =3 closed product
-            query.Append(@" SELECT     distinct top(2000)  Invoice.*
+            query.Append(@" SELECT     distinct  Invoice.*
                          FROM            Invoice
 						 where Invoice.Id in (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) >0 ");
 

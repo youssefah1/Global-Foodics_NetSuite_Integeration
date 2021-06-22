@@ -18,8 +18,7 @@ namespace NetSuiteIntegeration.Tasks
            
 
                 
-                List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" (Netsuite_Id IS NULL or Netsuite_Id =0) and inactive=0 and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
-                //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" id>=1200 and inactive=0 and Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
+            List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" FoodicsUpdateDate >= UpdateDate and inactive=0 and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
 
             List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
             List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
@@ -42,7 +41,7 @@ namespace NetSuiteIntegeration.Tasks
 
             if (Lst_ItemsUpdate.Count > 0)
             {
-                com.netsuite.webservices.InventoryItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
+                com.netsuite.webservices.InventoryItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate.Take(5).ToList());
                 // Send order list to netsuite
                 WriteResponseList wr = Service(true).updateList(ItemArrAdd);
             }
@@ -61,16 +60,13 @@ namespace NetSuiteIntegeration.Tasks
                     Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + Obj.Subsidiary_Id).FirstOrDefault();
                     Categories.CategoriesAccounts objCatAccount = new Categories.CategoriesAccounts();
                     com.netsuite.webservices.InventoryItem NewItemObject = new com.netsuite.webservices.InventoryItem();
-                    if (Obj.Netsuite_Id <= 0)
-                    {
-                        NewItemObject.displayName = Obj.Display_Name_En;
-                        //NewItemObject.itemId = Obj.UPC_Code;
-                        NewItemObject.itemId = Obj.Display_Name_En;
-                        NewItemObject.salesDescription = Obj.Display_Name_En;
-                    }
                     //check if new or can be updated
                     if (Obj.Netsuite_Id > 0)
                         NewItemObject.internalId = Obj.Netsuite_Id.ToString();
+
+                    NewItemObject.displayName = Obj.Display_Name_En;
+                    NewItemObject.itemId = Obj.UPC_Code;
+                    NewItemObject.salesDescription = Obj.Display_Name_En;
 
                     NewItemObject.trackLandedCost = true;
                     NewItemObject.trackLandedCostSpecified = true;
@@ -144,59 +140,61 @@ namespace NetSuiteIntegeration.Tasks
                     #region Items Account
                     RecordRef IncomAccountref = new RecordRef();
                     IncomAccountref.type = RecordType.account;
-                    NewItemObject.incomeAccount = IncomAccountref;
                     if (objCatAccount.income_account > 0)
                         IncomAccountref.internalId = objCatAccount.income_account.ToString();
-                    else
+                    else if (objSetting.IncomeAccount_Netsuite_Id > 0)
                         IncomAccountref.internalId = objSetting.IncomeAccount_Netsuite_Id.ToString();
+                    if (!string.IsNullOrEmpty( IncomAccountref.internalId))
+                        NewItemObject.incomeAccount = IncomAccountref;
+
 
                     RecordRef cogsAccountref = new RecordRef();
                     cogsAccountref.type = RecordType.account;
-                    NewItemObject.cogsAccount = cogsAccountref;
                     if (objCatAccount.cogs_account > 0)
                         cogsAccountref.internalId = objCatAccount.cogs_account.ToString();
-                    else
+                    else if(objSetting.CogsAccount_Netsuite_Id > 0)
                         cogsAccountref.internalId = objSetting.CogsAccount_Netsuite_Id.ToString();
+                    if (!string.IsNullOrEmpty(cogsAccountref.internalId))
+                        NewItemObject.cogsAccount = cogsAccountref;
 
                     RecordRef assetAccountref = new RecordRef();
                     assetAccountref.type = RecordType.account;
-                    NewItemObject.assetAccount = assetAccountref;
                     if (objCatAccount.asset_account > 0)
                         assetAccountref.internalId = objCatAccount.asset_account.ToString();
-                    else
+                    else if (objSetting.AssetAccount_Netsuite_Id >0)
                         assetAccountref.internalId = objSetting.AssetAccount_Netsuite_Id.ToString();
+                    if(!string.IsNullOrEmpty(assetAccountref.internalId))
+                       NewItemObject.assetAccount = assetAccountref;
+
 
                     RecordRef intercoIncomeref = new RecordRef();
                     intercoIncomeref.type = RecordType.account;
-                    NewItemObject.intercoIncomeAccount = intercoIncomeref;
                     if (objCatAccount.income_intercompany_account > 0)
                         intercoIncomeref.internalId = objCatAccount.income_intercompany_account.ToString();
-                    else
+                    else if (objSetting.IntercoIncomeAccount_Netsuite_Id > 0)
                         intercoIncomeref.internalId = objSetting.IntercoIncomeAccount_Netsuite_Id.ToString();
+
+                    if (!string.IsNullOrEmpty(intercoIncomeref.internalId))
+                        NewItemObject.intercoIncomeAccount = intercoIncomeref;
 
                     RecordRef intercoCogsAccount = new RecordRef();
                     intercoCogsAccount.type = RecordType.account;
-                    NewItemObject.intercoCogsAccount = intercoCogsAccount;
                     if (objCatAccount.inter_cogs_account > 0)
                         intercoCogsAccount.internalId = objCatAccount.inter_cogs_account.ToString();
-                    else
+                    else if (objSetting.IntercoCogsAccount_Netsuite_Id > 0)
                         intercoCogsAccount.internalId = objSetting.IntercoCogsAccount_Netsuite_Id.ToString();
+
+                    if (!string.IsNullOrEmpty(intercoCogsAccount.internalId))
+                        NewItemObject.intercoCogsAccount = intercoCogsAccount;
 
                     RecordRef gainLossAccount = new RecordRef();
                     gainLossAccount.type = RecordType.account;
-                    NewItemObject.gainLossAccount = gainLossAccount;
                     if (objCatAccount.gainloss_account > 0)
                         gainLossAccount.internalId = objCatAccount.gainloss_account.ToString();
-                    else
+                    else if(objSetting.GainLossAccount_Netsuite_Id > 0)
                         gainLossAccount.internalId = objSetting.GainLossAccount_Netsuite_Id.ToString();
-
-                    //if (objCatAccount.price_variance_account > 0)//You do not have permissions to set a value for element purchasepricevarianceacct 
-                    //{
-                    //    RecordRef PriceAccount = new RecordRef();
-                    //    PriceAccount.type = RecordType.account;
-                    //    PriceAccount.internalId = objCatAccount.price_variance_account.ToString();
-                    //    NewItemObject.purchasePriceVarianceAcct = PriceAccount;
-                    //}
+                    if (!string.IsNullOrEmpty(gainLossAccount.internalId))
+                        NewItemObject.gainLossAccount = gainLossAccount;
 
                     if (objCatAccount.cust_qty_variance_account > 0)
                     {

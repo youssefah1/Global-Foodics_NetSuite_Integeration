@@ -40,12 +40,22 @@ namespace Foodics.NetSuite.Shared.DAO
         }
         public List<PaymentMethodEntity> SelectCustomerPayment(int Order_Status)
         {
-            string query = @" SELECT   distinct top(2000)     PaymentMethodEntity.*
+            string query = @" SELECT   distinct  PaymentMethodEntity.*
                           FROM            Invoice INNER JOIN
                          PaymentMethodEntity ON Invoice.Id = PaymentMethodEntity.Entity_Id
 
 						 where isnull(Invoice.Netsuite_Id,0)>0 and Invoice.Order_Status=" + Order_Status +
                      " and (PaymentMethodEntity.Netsuite_Id IS NULL or PaymentMethodEntity.Netsuite_Id =0) ";
+
+            //query +=" and Invoice.[Date] < '2021-03-15' ";
+            using (db)
+            {
+                return db.Query<PaymentMethodEntity>(query).ToList();
+            }
+        }
+        public List<PaymentMethodEntity> SelectUpdateCustomerRefund()
+        {
+            string query = @" SELECT  * from BB_Customer_Refund";
 
             //query +=" and Invoice.[Date] < '2021-03-15' ";
             using (db)

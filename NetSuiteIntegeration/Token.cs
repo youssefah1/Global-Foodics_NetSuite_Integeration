@@ -58,13 +58,13 @@ namespace NetSuiteIntegeration
             var encoding = new System.Text.ASCIIEncoding();
             byte[] keyBytes = encoding.GetBytes(key);
             byte[] baseStringBytes = encoding.GetBytes(baseString);
-            using (var hmacSha1 = new HMACSHA1(keyBytes))
+            using (var hmacSha1 = new HMACSHA256(keyBytes))
             {
                 byte[] hashBaseString = hmacSha1.ComputeHash(baseStringBytes);
                 signature = Convert.ToBase64String(hashBaseString);
             }
             TokenPassportSignature sign = new TokenPassportSignature();
-            sign.algorithm = "HMAC-SHA1";
+            sign.algorithm = "HMAC-SHA256";
             sign.Value = signature;
             return sign;
         }

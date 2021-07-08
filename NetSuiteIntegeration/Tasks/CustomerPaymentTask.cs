@@ -17,7 +17,7 @@ namespace NetSuiteIntegeration.Tasks
         public override Int64 Set(string parametersArr)
         {
 
-            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> lstitemsAll = new CustomDAO().SelectCustomerPayment(4).Take(1).ToList();
+            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> lstitemsAll = new CustomDAO().SelectCustomerPayment(4);
             int Exe_length = 200;
             int lstend = Exe_length;
             if (lstitemsAll.Count > 0)
@@ -60,10 +60,7 @@ namespace NetSuiteIntegeration.Tasks
                                 currency.type = RecordType.currency;
                                 cp.currency = currency;
                                 StringCustomFieldRef FoodicsRef, FoodicsNumb;
-
-                                //exchangeRate
-                                // cp.exchangeRate = payobj.Exchange_Rate;
-
+                                
                                 // memo
                                 cp.memo = payobj.Notes;
 
@@ -147,12 +144,12 @@ namespace NetSuiteIntegeration.Tasks
                                 {
                                     is_valid = true;
 
-                                    // payment method
-                                    //RecordRef payment_method = new RecordRef();
-                                    //payment_method.internalId = payobj.Payment_Method_Id.ToString();
-                                    //payment_method.type = RecordType.customerPayment;
-                                    //cp.paymentMethod = payment_method;
-                                    //cp.authCode = payobj.Ref;
+                                    //payment method
+                                    RecordRef payment_method = new RecordRef();
+                                    payment_method.internalId = payobj.Payment_Method_Id.ToString();
+                                    payment_method.type = RecordType.customerPayment;
+                                    cp.paymentMethod = payment_method;
+                                    cp.authCode = payobj.Ref;
 
 
                                     // amount
@@ -206,7 +203,7 @@ namespace NetSuiteIntegeration.Tasks
 
                         RecordRef rf = (RecordRef)responseLst.writeResponse[counter].baseRef;
                         //update netsuiteId property
-                        Lst_Items[counter].Netsuite_Id = Convert.ToInt32(rf.internalId.ToString());
+                        //Lst_Items[counter].Netsuite_Id = Convert.ToInt32(rf.internalId.ToString());
                         //add item to the tuple
                         iDs.Add(new Tuple<int, string>(Convert.ToInt32(rf.internalId.ToString()), Lst_Items[counter].Id.ToString()));
                     }

@@ -18,7 +18,7 @@ namespace FoodicsIntegeration.Tasks
     {
         public override void Get(string Subsidiary)
         {
-            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "modifier_options";
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "modifier_options?include=tax_group";
             string NextPage = MainURL;
             do
             {
@@ -96,7 +96,10 @@ namespace FoodicsIntegeration.Tasks
                     Netsuiteitem.Price = (double)Foodicsitem.price;
                     Netsuiteitem.Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
                     Netsuiteitem.FoodicsUpdateDate = Foodicsitem.updated_at;
-
+                    if (Foodicsitem.tax_group != null && !string.IsNullOrEmpty(Foodicsitem.tax_group.id))
+                    {
+                        Netsuiteitem.FoodicsTaxGroup_Id = Foodicsitem.tax_group.id;
+                    }
                     NetSuitelst.Add(Netsuiteitem);
 
                 }

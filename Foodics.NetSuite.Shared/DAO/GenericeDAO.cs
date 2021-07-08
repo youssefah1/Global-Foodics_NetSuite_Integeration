@@ -811,7 +811,7 @@ namespace Foodics.NetSuite.Shared.DAO
             //{
             for (int i = 0; i < iDs.Count; i++)
             {
-                query.Append(@"UPDATE [" + tableName + "] SET Netsuite_Id=" + iDs[i].Item1 + "  Where (Netsuite_Id =0 or Netsuite_Id IS NULL) AND Foodics_Id='" + iDs[i].Item2 + "' ");
+                query.Append(@"UPDATE [" + tableName + "] SET Netsuite_Id=" + iDs[i].Item1 + "  Where Foodics_Id='" + iDs[i].Item2 + "' ");
                 //query.Append(@"UPDATE [SalesOrderItems] SET SalesOrder_Netsuite_Id = " + iDs[i].Item1 + "  Where SalesOrder_Netsuite_Id IS NULL AND SalesOrder_Id = " + iDs[i].Item2 + " ");
             }
             // }

@@ -15,100 +15,148 @@ namespace NetSuiteIntegeration.Tasks
     {
         public override Int64 Set(string parametersArr)
         {
-            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> returnList = new CustomDAO().SelectCustomerPayment(5).Take(200).ToList();
-            try
+            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> lstitemsAll = new CustomDAO().SelectCustomerPayment(5).Take(2000).ToList();
+            int Exe_length = 200;
+            int lstend = Exe_length;
+            if (lstitemsAll.Count > 0)
             {
-                if (returnList.Count > 0)
+                for (int Index = 0; Index < lstitemsAll.Count; Index += Exe_length)
                 {
-
-                    CustomerRefund[] memoList = new CustomerRefund[returnList.Count];
-                    for (int i = 0; i < returnList.Count; i++)
+                    if (Index + Exe_length >= lstitemsAll.Count)
+                        lstend = lstitemsAll.Count - Index;
+                    List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> returnList = lstitemsAll.GetRange(Index, lstend);
+                    try
                     {
-                        PaymentMethodEntity invoiceReturn = returnList[i];
-                        CustomerRefund memo = new CustomerRefund();
-                        CustomerRefundApply[] payApply = new CustomerRefundApply[1];
-                        CustomerRefundApplyList AplyList = new CustomerRefundApplyList();
-                        Foodics.NetSuite.Shared.Model.Invoice invoiceobj = new GenericeDAO<Foodics.NetSuite.Shared.Model.Invoice>().GetWhere(" Foodics_Id = '" + invoiceReturn.Foodics_Id + "'").FirstOrDefault();
-                        Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + invoiceobj.Subsidiary_Id).FirstOrDefault();
-                        //Customer
+                        if (returnList.Count > 0)
+                        {
 
-                        RecordRef entity = new RecordRef();
-                        entity.internalId = invoiceobj.Customer_Netsuite_Id > 0 ? invoiceobj.Customer_Netsuite_Id.ToString() : objSetting.Customer_Netsuite_Id.ToString();
-                        entity.type = RecordType.customer;
-                        memo.customer = entity;
+                            CustomerRefund[] memoList = new CustomerRefund[returnList.Count];
+                            for (int i = 0; i < returnList.Count; i++)
+                            {
+                                PaymentMethodEntity invoiceReturn = returnList[i];
+                                CustomerRefund memo = new CustomerRefund();
+                                CustomerRefundApply[] payApply = new CustomerRefundApply[1];
+                                CustomerRefundApplyList AplyList = new CustomerRefundApplyList();
+                                Foodics.NetSuite.Shared.Model.Invoice invoiceobj = new GenericeDAO<Foodics.NetSuite.Shared.Model.Invoice>().GetWhere(" Foodics_Id = '" + invoiceReturn.Foodics_Id + "'").FirstOrDefault();
+                                Setting objSetting = new GenericeDAO<Setting>().GetWhere("Subsidiary_Netsuite_Id=" + invoiceobj.Subsidiary_Id).FirstOrDefault();
+                                //Customer
 
-                        //currency
-                        RecordRef currency = new RecordRef();
-                        currency.internalId = objSetting.Currency_Netsuite_Id.ToString();
-                        currency.type = RecordType.currency;
-                        memo.currency = currency;
+                                RecordRef entity = new RecordRef();
+                                entity.internalId = invoiceobj.Customer_Netsuite_Id > 0 ? invoiceobj.Customer_Netsuite_Id.ToString() : objSetting.Customer_Netsuite_Id.ToString();
+                                entity.type = RecordType.customer;
+                                memo.customer = entity;
 
-                        //date
-                        memo.tranDateSpecified = true;
-                        //memo.tranDate = TimeZoneInfo.ConvertTimeToUtc(invoiceobj.Date, TimeZoneInfo.Local);
-                        memo.tranDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2021, 03, 01), TimeZoneInfo.Local);
+                                //currency
+                                RecordRef currency = new RecordRef();
+                                currency.internalId = objSetting.Currency_Netsuite_Id.ToString();
+                                currency.type = RecordType.currency;
+                                memo.currency = currency;
 
-                        //exchange rate
-                        memo.exchangeRate = invoiceobj.Exchange_Rate;
+                                //date
+                                memo.tranDateSpecified = true;
+                                memo.tranDate = TimeZoneInfo.ConvertTimeToUtc(invoiceobj.Date, TimeZoneInfo.Local);
 
-                        //subsidary
-                        RecordRef subsid = new RecordRef();
-                        subsid.internalId = invoiceobj.Subsidiary_Id.ToString();
-                        subsid.type = RecordType.subsidiary;
-                        memo.subsidiary = subsid;
+                                //exchange rate
+                                memo.exchangeRate = invoiceobj.Exchange_Rate;
 
-                        //cp.location
-                        RecordRef location = new RecordRef();
-                        location.internalId = invoiceobj.Location_Id.ToString();//objSetting.Location_Netsuite_Id.ToString();//payobj.Location_Id.ToString();
-                        location.type = RecordType.location;
-                        memo.location = location;
+                                //subsidary
+                                RecordRef subsid = new RecordRef();
+                                subsid.internalId = invoiceobj.Subsidiary_Id.ToString();
+                                subsid.type = RecordType.subsidiary;
+                                memo.subsidiary = subsid;
 
-                        #region Apply Invoice
-                        // Invoice
-                        payApply[0] = new CustomerRefundApply();
-                        payApply[0].apply = true;
-                        payApply[0].docSpecified = true;
-                        payApply[0].amountSpecified = true;
-                        payApply[0].currency = currency.internalId;
-                        payApply[0].type = "CreditMemo";
-                        payApply[0].doc = invoiceobj.Netsuite_Id;
-                        payApply[0].total = invoiceobj.Paid;
-                        payApply[0].amount = invoiceobj.Paid;
-                        payApply[0].applyDate = invoiceobj.Date;
+                                //cp.location
+                                RecordRef location = new RecordRef();
+                                location.internalId = invoiceobj.Location_Id.ToString();
+                                location.type = RecordType.location;
+                                memo.location = location;
 
-                        AplyList.apply = payApply;
-                        memo.applyList = AplyList;
-                        #endregion
+                                #region Apply Invoice
+                                // Invoice
+                                payApply[0] = new CustomerRefundApply();
+                                payApply[0].apply = true;
+                                payApply[0].docSpecified = true;
+                                payApply[0].amountSpecified = true;
+                                payApply[0].currency = currency.internalId;
+                                payApply[0].type = "CreditMemo";
+                                payApply[0].doc = invoiceobj.Netsuite_Id;
+                                payApply[0].total = invoiceobj.Paid;
+                                payApply[0].amount = invoiceobj.Paid;
+                                payApply[0].applyDate = invoiceobj.Date;
 
-                        #region payment Method
-                            RecordRef payment_method = new RecordRef();
-                            payment_method.internalId = "1";//payobj.Payment_Method_Id.ToString();
-                            payment_method.type = RecordType.customerPayment;
-                            memo.paymentMethod = payment_method;
+                                AplyList.apply = payApply;
+                                memo.applyList = AplyList;
+                                #endregion
 
-                        #endregion
+                                #region payment Method
+                                RecordRef payment_method = new RecordRef();
+                                payment_method.internalId = invoiceReturn.Payment_Method_Id.ToString();
+                                payment_method.type = RecordType.customerPayment;
+                                memo.paymentMethod = payment_method;
+                                #endregion
+
+                                memoList[i] = memo;
+                            }
 
 
-
-
-                        memoList[i] = memo;
+                            if (memoList.Length > 0)
+                            {
+                                WriteResponseList wr = Service(true).addList(memoList.ToArray());
+                                bool result = wr.status.isSuccess;
+                                UpdatedLst(returnList, wr);
+                            }
+                        }
                     }
-
-
-                    if (memoList.Length > 0)
+                    catch (Exception ex)
                     {
-                        WriteResponseList wr = Service(true).addList(memoList.ToArray());
-                        bool result = wr.status.isSuccess;
-                        UpdatedLst(returnList, wr);
+                        LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message);
-            }
             return 0;
         }
+        /*
+         * Update transaction date
+        //public override Int64 Set(string parametersArr)
+        //{
+
+        //    List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> lstitemsAll = new CustomDAO().SelectUpdateCustomerRefund();
+        //    int Exe_length = 100;
+        //    int lstend = Exe_length;
+        //    if (lstitemsAll.Count > 0)
+        //    {
+        //        for (int Index = 0; Index < lstitemsAll.Count; Index += Exe_length)
+        //        {
+        //            if (Index + Exe_length >= lstitemsAll.Count)
+        //                lstend = lstitemsAll.Count - Index;
+        //            List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> returnList = lstitemsAll.GetRange(Index, lstend);
+
+        //            if (returnList.Count > 0)
+        //            {
+
+        //                CustomerRefund[] memoList = new CustomerRefund[returnList.Count];
+        //                for (int i = 0; i < returnList.Count; i++)
+        //                {
+        //                    PaymentMethodEntity invoiceReturn = returnList[i];
+
+
+        //                    CustomerRefund memo = new CustomerRefund();
+        //                    memo.internalId = invoiceReturn.Netsuite_Id.ToString();
+        //                    memo.tranDate = TimeZoneInfo.ConvertTimeToUtc(invoiceReturn.Business_Date, TimeZoneInfo.Local);
+        //                    memo.tranDateSpecified = true;
+        //                    memoList[i] = memo;
+        //                }
+        //                WriteResponseList wr = Service(true).updateList(memoList.ToArray());
+        //            }
+
+        //        }
+        //    }*/
+
+
+
+
+        //    return 0;
+        //}
 
         private void UpdatedLst(List<Foodics.NetSuite.Shared.Model.PaymentMethodEntity> Lst_Items, WriteResponseList responseLst)
         {

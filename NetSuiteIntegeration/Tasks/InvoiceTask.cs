@@ -56,8 +56,8 @@ namespace NetSuiteIntegeration.Tasks
 				where Foodics_Id =@id
                  */
                 #endregion
-                List<Foodics.NetSuite.Shared.Model.Invoice> lstitemsAll = new CustomDAO().SelectInvoice(4);
-                int Exe_length = 200;
+                List<Foodics.NetSuite.Shared.Model.Invoice> lstitemsAll = new CustomDAO().SelectInvoice(4).Take(2000).ToList();
+                int Exe_length = 100;
                 int lstend = Exe_length;
                 if (lstitemsAll.Count > 0)
                 {
@@ -117,7 +117,7 @@ namespace NetSuiteIntegeration.Tasks
                                                 float Discount = itemDetails.Line_Discount_Amount;
                                                 k++;
                                                 Foodics.NetSuite.Shared.Model.InvoiceItem OtherCharge = new Foodics.NetSuite.Shared.Model.InvoiceItem();
-                                                OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id; 
+                                                OtherCharge.Item_Id = objSetting.OtherChargeItem_Netsuite_Id;
                                                 OtherCharge.Amount = Discount * -1;
                                                 OtherCharge.Quantity = 1;
                                                 OtherCharge.Item_Type = "OtherChargeResaleItem";
@@ -143,11 +143,13 @@ namespace NetSuiteIntegeration.Tasks
                                     #region Standard Attributes
                                     invoice_date = TimeZoneInfo.ConvertTimeToUtc(invoice_info.Date, TimeZoneInfo.Local);
 
+                                    invoiceObject.externalId = invoice_info.BarCode;
                                     invoiceObject.tranDateSpecified = true;
                                     invoiceObject.dueDateSpecified = true;
                                     invoiceObject.tranDate = invoice_date;
                                     invoiceObject.dueDate = invoice_date;
                                     invoiceObject.exchangeRate = invoice_info.Exchange_Rate;
+
 
                                     //invoiceObject.memo = invoice_info.Notes;
                                     if (invoice_info.Subsidiary_Id > 0)
@@ -211,7 +213,10 @@ namespace NetSuiteIntegeration.Tasks
                                     }
                                     #endregion
 
-
+                                    //RecordRef Approval = new RecordRef();
+                                    //Approval.internalId = "2";
+                                    ////Approval.type = RecordType.;
+                                    //invoiceObject.approvalStatus = Approval;
 
                                     #region Invoice Custom Attributes
                                     FoodicsRef = new StringCustomFieldRef();
@@ -249,7 +254,7 @@ namespace NetSuiteIntegeration.Tasks
                                 }
                             }
                             // Send invoice list to netsuite
-                            WriteResponseList wr = Service(true).addList(InvoiceArr);
+                            WriteResponseList wr = Service(true).upsertList(InvoiceArr);
                             result = wr.status.isSuccess;
                             if (result)
                             {
@@ -275,7 +280,14 @@ namespace NetSuiteIntegeration.Tasks
             RecordRef taxCode, item, unit, price;
             InvoiceItem invoiceItemObject = new InvoiceItem();
             taxCode = new RecordRef();
-            taxCode.internalId = itemDetails.FoodicsTax > 0 ? objSetting.TaxCode_Netsuite_Id.ToString() : objSetting.TaxCode_Free_Netsuite_Id.ToString();
+            // if (objSetting.TaxApplied)
+            if (itemDetails.FoodicsTax > 0 && itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+                taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString() ;
+            else
+                taxCode.internalId =  objSetting.TaxCode_Free_Netsuite_Id.ToString();
+
+            //else
+            //  taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString();
             taxCode.type = RecordType.taxAcct;
             if (int.Parse(taxCode.internalId) > 0)
                 invoiceItemObject.taxCode = taxCode;
@@ -297,23 +309,11 @@ namespace NetSuiteIntegeration.Tasks
             price.type = RecordType.priceLevel;
             price.internalId = "-1";
             invoiceItemObject.price = price;
-
-            //if (itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
-            //{
-            //if (itemDetails.FoodicsTax > 0)
-            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
-            //else
-            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
-            //}
-            //else
-            //{
-            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
-            //}
-            //old code
-            if (itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+            float taxRate = 1 + (objSetting.TaxRate / 100);
+            if (itemDetails.FoodicsTax > 0 && itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
             {
-                if (objSetting.TaxApplied && itemDetails.FoodicsTax > 0)
-                    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
+                if (objSetting.TaxApplied)//= tax inclusive in item price
+                    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / taxRate);
                 else
                     invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
             }
@@ -321,6 +321,17 @@ namespace NetSuiteIntegeration.Tasks
             {
                 invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
             }
+            //if (itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+            //{
+            //    if (objSetting.TaxApplied && itemDetails.FoodicsTax > 0)
+            //        invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
+            //    else
+            //        invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+            //}
+            //else
+            //{
+            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+            //}
             #endregion
             invoiceItemObject.quantitySpecified = true;
             invoiceItemObject.quantity = itemDetails.Quantity;
@@ -353,7 +364,7 @@ namespace NetSuiteIntegeration.Tasks
                         {
                             RecordRef rf = (RecordRef)responseLst.writeResponse[counter].baseRef;
                             //update netsuiteId property
-                            InvoiceLst[counter].Netsuite_Id = Convert.ToInt32(rf.internalId.ToString());
+                            //InvoiceLst[counter].Netsuite_Id = Convert.ToInt32(rf.internalId.ToString());
                             //add item to the tuple
                             iDs.Add(new Tuple<int, string>(Convert.ToInt32(rf.internalId.ToString()), InvoiceLst[counter].Foodics_Id));
                         }

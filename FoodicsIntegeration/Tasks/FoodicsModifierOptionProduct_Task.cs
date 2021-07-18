@@ -19,6 +19,7 @@ namespace FoodicsIntegeration.Tasks
         public override void Get(string Subsidiary)
         {
             string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "modifier_options?include=ingredients,modifier,tax_group";
+            //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "modifier_options?include=ingredients,modifier,tax_group&filter[id]=93334e52-d562-49df-bcf3-5c40c7e164ef";
             string NextPage = MainURL;
             do
             {
@@ -108,13 +109,12 @@ namespace FoodicsIntegeration.Tasks
                     foreach (var ingredientsobj in Foodicsitem.ingredients)
                     {
                         Item itemcomponent = new GenericeDAO<Item>().GetByFoodicsId(ingredientsobj.id);
-                        if (itemcomponent != null)//&& itemcomponent.Netsuite_Id > 0)
-                        {
+                        
                             ItemCompnent objitmcom = new ItemCompnent();
-                            objitmcom.UnitId = 0;//Utility.ConvertToInt(itemobj.memberUnit);
+                            objitmcom.UnitId = 0;
                             objitmcom.UnitName = ingredientsobj.ingredient_unit;
                             objitmcom.Quantity = ingredientsobj.pivot.quantity;
-                            if (itemcomponent.Netsuite_Id > 0)
+                            if (itemcomponent != null && itemcomponent.Netsuite_Id > 0)
                                 objitmcom.ComponentId = itemcomponent.Netsuite_Id;
                             else
                                 objitmcom.ComponentId = 0;
@@ -124,10 +124,9 @@ namespace FoodicsIntegeration.Tasks
                             if (itemobj != null && itemobj.Netsuite_Id > 0)
                                 objitmcom.ItemId = itemobj.Netsuite_Id;
                             else
-                                objitmcom.ItemId = 0;//Utility.ConvertToInt(Assitem.internalId);
+                                objitmcom.ItemId = 0;
 
                             ItemCompnentList.Add(objitmcom);
-                        }
                     }
 
                     NetSuitelst.Add(Netsuiteitem);
@@ -141,7 +140,7 @@ namespace FoodicsIntegeration.Tasks
                 //Itemids += "'";
                 //new CustomDAO().DeleteFoodicsItemsComponent(Itemids);
                 //new GenericeDAO<ItemCompnent>().ListInsertOnly(ItemCompnentList);
-                //new CustomDAO().UpdateCompnentitemID();
+                new CustomDAO().UpdateProductCompnent();
 
                 //return NetSuitelst;
             }

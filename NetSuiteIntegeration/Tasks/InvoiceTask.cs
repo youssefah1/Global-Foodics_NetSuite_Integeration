@@ -188,10 +188,18 @@ namespace NetSuiteIntegeration.Tasks
                                         RecordRef discountitem = new RecordRef();
                                         discountitem.type = RecordType.discountItem;
                                         invoiceObject.discountItem = discountitem;
-                                        if (objSetting.TaxApplied)
-                                            invoiceObject.discountRate = (Math.Round((invoice_info.Total_Discount / 1.15), 3) * -1).ToString();
+                                        float taxRate = 1 + (objSetting.TaxRate / 100);
+                                        if (objSetting.TaxAlwaysAppliedInItems)
+                                        {
+                                            invoiceObject.discountRate = (Math.Round((invoice_info.Total_Discount / taxRate), 3) * -1).ToString();
+                                        }
                                         else
-                                            invoiceObject.discountRate = (Math.Round(invoice_info.Total_Discount, 3) * -1).ToString();
+                                        {
+                                            if (objSetting.ItemTaxInclusive)
+                                                invoiceObject.discountRate = (Math.Round((invoice_info.Total_Discount / taxRate), 3) * -1).ToString();
+                                            else
+                                                invoiceObject.discountRate = (Math.Round(invoice_info.Total_Discount, 3) * -1).ToString();
+                                        }
 
                                         if (invoice_info.Discount_Id > 0)
                                             discountitem.internalId = invoice_info.Discount_Id.ToString();
@@ -280,11 +288,17 @@ namespace NetSuiteIntegeration.Tasks
             RecordRef taxCode, item, unit, price;
             InvoiceItem invoiceItemObject = new InvoiceItem();
             taxCode = new RecordRef();
-            // if (objSetting.TaxApplied)
-            if (itemDetails.FoodicsTax > 0 && itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
-                taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString() ;
+            if (objSetting.TaxAlwaysAppliedInItems)
+            {
+                taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString();
+            }
             else
-                taxCode.internalId =  objSetting.TaxCode_Free_Netsuite_Id.ToString();
+            {
+                if (itemDetails.FoodicsTax > 0 && itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+                    taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString();
+                else
+                    taxCode.internalId = objSetting.TaxCode_Free_Netsuite_Id.ToString();
+            }
 
             //else
             //  taxCode.internalId = objSetting.TaxCode_Netsuite_Id.ToString();
@@ -310,28 +324,26 @@ namespace NetSuiteIntegeration.Tasks
             price.internalId = "-1";
             invoiceItemObject.price = price;
             float taxRate = 1 + (objSetting.TaxRate / 100);
-            if (itemDetails.FoodicsTax > 0 && itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+
+            if (objSetting.TaxAlwaysAppliedInItems)
             {
-                if (objSetting.TaxApplied)//= tax inclusive in item price
-                    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / taxRate);
-                else
-                    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+                invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / taxRate);
             }
             else
             {
-                invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+                if (itemDetails.FoodicsTax > 0 && itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
+                {
+                    if (objSetting.ItemTaxInclusive)//= tax inclusive in item price
+                        invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / taxRate);
+                    else
+                        invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+                }
+                else
+                {
+                    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
+                }
             }
-            //if (itemDetails.Item_Type != nameof(Item_Type.OtherChargeSaleItem))
-            //{
-            //    if (objSetting.TaxApplied && itemDetails.FoodicsTax > 0)
-            //        invoiceItemObject.rate = Convert.ToString(itemDetails.Amount / 1.15);
-            //    else
-            //        invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
-            //}
-            //else
-            //{
-            //    invoiceItemObject.rate = Convert.ToString(itemDetails.Amount);
-            //}
+
             #endregion
             invoiceItemObject.quantitySpecified = true;
             invoiceItemObject.quantity = itemDetails.Quantity;

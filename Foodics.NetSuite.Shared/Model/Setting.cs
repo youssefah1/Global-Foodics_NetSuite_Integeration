@@ -29,9 +29,8 @@ namespace Foodics.NetSuite.Shared.Model
         public int Location_Netsuite_Id { get; set; }
         public int TaxSchedule_Netsuite_Id { get; set; }
         public bool InActive { get; set; }
-        public bool TaxApplied { get; set; }
-        public bool TaxOptionApplied { get; set; }
-        
+        public bool ItemTaxInclusive { get; set; }
+        public bool TaxAlwaysAppliedInItems { get; set; }
         public int DiscountAccount_Netsuite_Id { get; set; }
         public int DiscountItem_Netsuite_Id { get; set; }
         public int IncomeAccount_Netsuite_Id { get; set; }

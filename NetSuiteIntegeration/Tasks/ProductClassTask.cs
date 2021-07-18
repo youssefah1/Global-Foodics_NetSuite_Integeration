@@ -54,6 +54,8 @@ namespace NetSuiteIntegeration.Tasks
                  UpdatedLst(Lst_Items, wr);
             }
             new CustomDAO().InvoiceRelatedUpdate();
+            new CustomDAO().SetItemClass();
+
             return 0;
         }
 

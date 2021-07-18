@@ -57,7 +57,8 @@ namespace NetSuiteIntegeration.Tasks
                     com.netsuite.webservices.AssemblyItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
 
                     WriteResponseList wr = Service(true).updateList(ItemArrAdd);
-                //    bool result = wr.status.isSuccess;
+                    UpdatedLst(Lst_ItemsUpdate, wr);
+                    //    bool result = wr.status.isSuccess;
 
                 }
                 new CustomDAO().UpdateProductCompnent();
@@ -89,19 +90,21 @@ namespace NetSuiteIntegeration.Tasks
                     if (Obj.Netsuite_Id <= 0)
                     {
                         NewItemObject.displayName = Obj.Display_Name_En;
-                        //NewItemObject.itemId = Obj.UPC_Code;
-                        NewItemObject.itemId = Obj.Display_Name_En;
+                        NewItemObject.itemId = Obj.UPC_Code;
+                        //NewItemObject.itemId = Obj.Display_Name_En;
                     }
-                    RecordRef classref = new RecordRef();
-                    classref.internalId = Obj.Category_Id.ToString();
-                    classref.type = RecordType.classification;
-                    NewItemObject.@class = classref;
+                  
 
                     NewItemObject.trackLandedCost = true;
                     NewItemObject.trackLandedCostSpecified = true;
 
                     if (Obj.Category_Id > 0)
                     {
+                        RecordRef classref = new RecordRef();
+                        classref.internalId = Obj.Category_Id.ToString();
+                        classref.type = RecordType.classification;
+                        NewItemObject.@class = classref;
+
                         objCatAccount = new GenericeDAO<Categories.CategoriesAccounts>().GetWhere("Netsuite_Id=" + Obj.Category_Id).FirstOrDefault();
                     }
 
@@ -165,7 +168,7 @@ namespace NetSuiteIntegeration.Tasks
                     NewItemObject.incomeAccount = IncomAccountref;
                     if (objCatAccount.income_account > 0)
                         IncomAccountref.internalId = objCatAccount.income_account.ToString();
-                    else
+                    else if (objSetting.IncomeAccount_Netsuite_Id > 0)
                         IncomAccountref.internalId = objSetting.IncomeAccount_Netsuite_Id.ToString();
 
                     RecordRef cogsAccountref = new RecordRef();
@@ -173,7 +176,7 @@ namespace NetSuiteIntegeration.Tasks
                     NewItemObject.cogsAccount = cogsAccountref;
                     if (objCatAccount.cogs_account > 0)
                         cogsAccountref.internalId = objCatAccount.cogs_account.ToString();
-                    else
+                    else if (objSetting.CogsAccount_Netsuite_Id > 0)
                         cogsAccountref.internalId = objSetting.CogsAccount_Netsuite_Id.ToString();
 
                     RecordRef assetAccountref = new RecordRef();
@@ -181,7 +184,7 @@ namespace NetSuiteIntegeration.Tasks
                     NewItemObject.assetAccount = assetAccountref;
                     if (objCatAccount.asset_account > 0)
                         assetAccountref.internalId = objCatAccount.asset_account.ToString();
-                    else
+                    else if (objSetting.AssetAccount_Netsuite_Id > 0)
                         assetAccountref.internalId = objSetting.AssetAccount_Netsuite_Id.ToString();
 
                     RecordRef intercoIncomeref = new RecordRef();
@@ -189,7 +192,7 @@ namespace NetSuiteIntegeration.Tasks
                     NewItemObject.intercoIncomeAccount = intercoIncomeref;
                     if (objCatAccount.income_intercompany_account > 0)
                         intercoIncomeref.internalId = objCatAccount.income_intercompany_account.ToString();
-                    else
+                    else if(objSetting.IntercoIncomeAccount_Netsuite_Id >0)
                         intercoIncomeref.internalId = objSetting.IntercoIncomeAccount_Netsuite_Id.ToString();
 
                     RecordRef intercoCogsAccount = new RecordRef();
@@ -197,7 +200,7 @@ namespace NetSuiteIntegeration.Tasks
                     NewItemObject.intercoCogsAccount = intercoCogsAccount;
                     if (objCatAccount.inter_cogs_account > 0)
                         intercoCogsAccount.internalId = objCatAccount.inter_cogs_account.ToString();
-                    else
+                    else if (objSetting.IntercoCogsAccount_Netsuite_Id > 0)
                         intercoCogsAccount.internalId = objSetting.IntercoCogsAccount_Netsuite_Id.ToString();
 
                     RecordRef gainLossAccount = new RecordRef();
@@ -205,7 +208,7 @@ namespace NetSuiteIntegeration.Tasks
                     NewItemObject.gainLossAccount = gainLossAccount;
                     if (objCatAccount.gainloss_account > 0)
                         gainLossAccount.internalId = objCatAccount.gainloss_account.ToString();
-                    else
+                    else if (objSetting.GainLossAccount_Netsuite_Id > 0)
                         gainLossAccount.internalId = objSetting.GainLossAccount_Netsuite_Id.ToString();
 
                     

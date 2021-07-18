@@ -15,16 +15,15 @@ namespace NetSuiteIntegeration.Tasks
     {
         public override Int64 Set(string parametersArr)
         {
-           
 
-                
-            List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" FoodicsUpdateDate >= UpdateDate and inactive=0 and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
 
-            List<Item> Lst_ItemsUpdate = Lst_ItemsAll.Where(x => x.Netsuite_Id > 0).ToList();
-            List<Item> Lst_ItemsNew = Lst_ItemsAll.Where(x => x.Netsuite_Id == 0 || x.Netsuite_Id < 0).ToList();
+            new CustomDAO().InvoiceRelatedUpdate();
+            new CustomDAO().SetItemClass();
 
-            if (Lst_ItemsAll.Count <= 0)
-                return 0;
+            //List<Item> Lst_ItemsAll = new GenericeDAO<Item>().GetWhere(" FoodicsUpdateDate >= UpdateDate and inactive=0 and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
+
+            List<Item> Lst_ItemsUpdate = new GenericeDAO<Item>().GetWhere(" isnull(Netsuite_Id,0) >0 and FoodicsUpdateDate >= UpdateDate and inactive=0 and  Item_Type=" + (int)Item_Type.InventoryItem).Take(100).ToList();
+            List<Item> Lst_ItemsNew = new GenericeDAO<Item>().GetWhere("  isnull(Netsuite_Id,0) =0 and inactive=0 and  Item_Type=" + (int)Item_Type.InventoryItem).Take(200).ToList();
 
             // Send order list to netsuite
             if (Lst_ItemsNew.Count > 0)
@@ -41,9 +40,15 @@ namespace NetSuiteIntegeration.Tasks
 
             if (Lst_ItemsUpdate.Count > 0)
             {
-                com.netsuite.webservices.InventoryItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate.Take(5).ToList());
-                // Send order list to netsuite
-                WriteResponseList wr = Service(true).updateList(ItemArrAdd);
+                com.netsuite.webservices.InventoryItem[] ItemArrAdd = GenerateNetSuitelst(Lst_ItemsUpdate);
+                WriteResponseList wrNew = Service(true).updateList(ItemArrAdd);
+                bool result = wrNew.status.isSuccess;
+                if (result)
+                {
+                    //Update database with returned Netsuite ids
+                    UpdatedLst(Lst_ItemsNew, wrNew);
+                }
+                              
             }
 
             return 0;

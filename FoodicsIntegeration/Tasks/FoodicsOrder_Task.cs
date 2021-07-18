@@ -19,75 +19,75 @@ namespace FoodicsIntegeration.Tasks
         public override void Get(string Subsidiary)
         {
             int Subsidiary_Id = Utility.ConvertToInt(ConfigurationManager.AppSettings[Subsidiary + "Netsuite.Subsidiary_Id"]);
-            object fromDateObj = new GenericeDAO<Invoice>().GetLatestModifiedDate(Subsidiary_Id, "CreateDate");
-            DateTime fromDate = new DateTime();
-            if (fromDateObj == null)
+            //object fromDateObj = new GenericeDAO<Invoice>().GetLatestModifiedDate(Subsidiary_Id, "CreateDate");
+            //DateTime fromDate = new DateTime();
+            //if (fromDateObj == null)
+            //{
+            //    fromDate = DateTime.Now;
+            //}
+            //else
+            //{
+            //    fromDate = (DateTime)fromDateObj;
+            //}
+            //fromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day).AddDays(-3);
+             DateTime fromDate = Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]);
+            //while (fromDate <= DateTime.Now)
+            //{
+            string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,charges.charge,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
+            //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,charges.charge,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[id]=c0f6ffc7-5804-4e3b-a7af-2131a1c267e6";
+            string NextPage = MainURL;
+            do
             {
-                fromDate = DateTime.Now;
-            }
-            else
-            {
-                fromDate = (DateTime)fromDateObj;
-            }
-            fromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day).AddDays(-3);
-            // DateTime fromDate = Utility.ConvertToDateTime(ConfigurationManager.AppSettings["InvoiceDate"]);
-            while (fromDate <= DateTime.Now)
-            {
-                string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,charges.charge,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[business_date]=" + fromDate.ToString("yyyy-MM-dd");
-                //string MainURL = ConfigurationManager.AppSettings[Subsidiary + "Foodics.ResetURL"] + "orders?include=original_order,charges.charge,customer,branch,creator,discount,combos.combo_size.combo,combos.products,products.product,products.discount,products.options,products.options.modifier_option,payments.payment_method&filter[status]=4&filter[status]=5" + "&filter[id]=30cf0e5e-8999-42fb-b600-8c2a5179eb85";
-                string NextPage = MainURL;
-                do
+                var client = new RestClient(NextPage);
+                //client.Timeout = -1;
+                client.Timeout = 200000;
+                var request = new RestRequest(Method.GET);
+                request.AddHeader("Authorization", "Bearer " + ConfigurationManager.AppSettings[Subsidiary + "Foodics.Token"]);
+                var response = client.Execute<Dictionary<string, List<FoodicsOrder>>>(request);
+                if (response.StatusCode == HttpStatusCode.OK && response.Data != null)
                 {
-                    var client = new RestClient(NextPage);
-                    //client.Timeout = -1;
-                    client.Timeout = 200000;
-                    var request = new RestRequest(Method.GET);
-                    request.AddHeader("Authorization", "Bearer " + ConfigurationManager.AppSettings[Subsidiary + "Foodics.Token"]);
-                    var response = client.Execute<Dictionary<string, List<FoodicsOrder>>>(request);
-                    if (response.StatusCode == HttpStatusCode.OK && response.Data != null)
+                    string content = response.Content;
+                    var Jobj = JObject.Parse(content);
+                    var nodes = Jobj.Descendants()
+                   .OfType<JProperty>()
+                   .Where(p => p.Name == "next")
+                   .Select(p => p.Parent)
+                   .ToList();
+                    if (nodes.Count > 0)
                     {
-                        string content = response.Content;
-                        var Jobj = JObject.Parse(content);
-                        var nodes = Jobj.Descendants()
-                       .OfType<JProperty>()
-                       .Where(p => p.Name == "next")
-                       .Select(p => p.Parent)
-                       .ToList();
-                        if (nodes.Count > 0)
+                        FoodicsLinks objLinks = new FoodicsLinks();
+                        try
                         {
-                            FoodicsLinks objLinks = new FoodicsLinks();
-                            try
+                            objLinks = JsonConvert.DeserializeObject<FoodicsLinks>(JsonConvert.SerializeObject(nodes[0]));
+                            NextPage = objLinks.next;
+                            if (!string.IsNullOrEmpty(NextPage))
                             {
-                                objLinks = JsonConvert.DeserializeObject<FoodicsLinks>(JsonConvert.SerializeObject(nodes[0]));
-                                NextPage = objLinks.next;
-                                if (!string.IsNullOrEmpty(NextPage))
-                                {
-                                    int startIndex = NextPage.LastIndexOf("?") + 1;
-                                    int endIndex = NextPage.Length - startIndex;
-                                    string page = NextPage.Substring(startIndex, endIndex);
-                                    NextPage = MainURL + "&" + page;
-                                }
-                                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
+                                int startIndex = NextPage.LastIndexOf("?") + 1;
+                                int endIndex = NextPage.Length - startIndex;
+                                string page = NextPage.Substring(startIndex, endIndex);
+                                NextPage = MainURL + "&" + page;
                             }
-                            catch (Exception ex)
-                            {
-                                LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message + " - Page index:" + NextPage);
-                            }
+                            LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "From Date " + fromDate.ToString("yyyy-MM-dd") + " Page:" + NextPage);
                         }
-                        foreach (var item in response.Data)
+                        catch (Exception ex)
                         {
-                            if (item.Key == "data")
-                            {
-                                if (item.Value.Count > 0)
-                                    Generate_Save_NetSuiteLst(item.Value, Subsidiary_Id);
-                            }
+                            LogDAO.Integration_Exception(LogIntegrationType.Error, this.GetType().FullName + "." + System.Reflection.MethodBase.GetCurrentMethod().Name, "Error " + ex.Message + " - Page index:" + NextPage);
                         }
                     }
+                    foreach (var item in response.Data)
+                    {
+                        if (item.Key == "data")
+                        {
+                            if (item.Value.Count > 0)
+                                Generate_Save_NetSuiteLst(item.Value, Subsidiary_Id);
+                        }
+                    }
+                }
 
 
-                } while (!string.IsNullOrEmpty(NextPage));
-                fromDate = fromDate.AddDays(1);
-            }
+            } while (!string.IsNullOrEmpty(NextPage));
+            //    fromDate = fromDate.AddDays(1);
+            //}
 
 
         }

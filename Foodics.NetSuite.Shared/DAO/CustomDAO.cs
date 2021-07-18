@@ -31,7 +31,8 @@ namespace Foodics.NetSuite.Shared.DAO
 						 (select invoice_id from InvoiceItem where isnull(InvoiceItem.Item_Id,0) = 0 and  ProductStatus =3)");
 
            // query.Append(" and id = 356 ");
-            //query.Append(" and Invoice.[Date] < '2021-03-15' ");
+            //query.Append(" and Invoice.[Date] = '2021-07-08' ");
+            //query.Append(" and Invoice.[Location_Id] = 207 ");
 
             using (db)
             {
